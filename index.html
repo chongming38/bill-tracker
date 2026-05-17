@@ -10,48 +10,26 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#fff;--bg2:#f5f5f3;--bg3:#eeede9;
-  --text:#1a1a1a;--text2:#666;--text3:#999;
-  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
-  --radius:12px;--radius-sm:8px;
-  --out:#b85a30;--in:#3b6d11;--accent:#3266ad;
-}
-@media(prefers-color-scheme:dark){
-  :root{
-    --bg:#1a1a1a;--bg2:#242424;--bg3:#2a2a2a;
-    --text:#f0f0f0;--text2:#aaa;--text3:#555;
-    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.16);
-    --out:#e07a50;--in:#6aaa30;
-  }
-}
+:root{--bg:#fff;--bg2:#f5f5f3;--bg3:#eeede9;--text:#1a1a1a;--text2:#666;--text3:#999;--border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);--radius:12px;--radius-sm:8px;--out:#b85a30;--in:#3b6d11;--accent:#3266ad;}
+@media(prefers-color-scheme:dark){:root{--bg:#1a1a1a;--bg2:#242424;--bg3:#2a2a2a;--text:#f0f0f0;--text2:#aaa;--text3:#555;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.16);--out:#e07a50;--in:#6aaa30;}}
 body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;}
 .app{max-width:480px;margin:0 auto;background:var(--bg3);min-height:100vh;}
-
-/* header */
 .header{background:var(--bg);padding:1rem 1.25rem 0;border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:20;}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
 .header-title{font-size:17px;font-weight:500;}
 .header-btns{display:flex;gap:8px;}
-.icon-btn{width:34px;height:34px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:18px;transition:background 0.15s;}
-.icon-btn:hover{background:var(--bg2);}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:18px;}
 .month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
-.month-nav button{background:none;border:none;cursor:pointer;color:var(--text2);font-size:22px;padding:4px 8px;border-radius:6px;}
+.month-nav button{background:none;border:none;cursor:pointer;color:var(--text2);font-size:22px;padding:4px 8px;}
 .month-label{font-size:15px;font-weight:500;}
-
-/* tabs */
 .tabs{display:flex;border-top:0.5px solid var(--border);}
-.tab{flex:1;padding:10px 0;font-size:13px;font-weight:500;color:var(--text3);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.15s;}
+.tab{flex:1;padding:10px 0;font-size:13px;font-weight:500;color:var(--text3);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-
-/* budget bar */
 .budget-bar-wrap{padding:0.5rem 1.25rem 0.75rem;background:var(--bg);border-bottom:0.5px solid var(--border);}
 .budget-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px;}
 .budget-track{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
 .budget-fill{height:100%;border-radius:3px;transition:width 0.4s;background:var(--accent);}
 .budget-fill.over{background:var(--out);}
-
-/* sections */
 .section{margin:1rem 1rem 0;}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
 .stat-card{background:var(--bg);border-radius:var(--radius);padding:1rem;}
@@ -62,16 +40,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .stat-value.in{color:var(--in);}
 .stat-value.ok{color:var(--in);}
 .stat-value.over{color:var(--out);}
-
-/* chart */
 .chart-card{background:var(--bg);border-radius:var(--radius);padding:1rem;margin-top:10px;}
 .card-title{font-size:13px;color:var(--text2);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
 .card-hint{font-size:11px;color:var(--text3);}
 .chart-wrap{position:relative;width:100%;height:160px;}
-
-/* category list */
 .cat-card{background:var(--bg);border-radius:var(--radius);padding:1rem;margin-top:10px;}
-.cat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer;border-radius:var(--radius-sm);transition:background 0.1s;}
+.cat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer;border-radius:var(--radius-sm);}
 .cat-row:last-child{margin-bottom:0;}
 .cat-row:active{background:var(--bg2);}
 .cat-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
@@ -81,8 +55,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .cat-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .cat-amt{font-size:13px;color:var(--text2);width:60px;text-align:right;}
 .cat-arrow{font-size:14px;color:var(--text3);}
-
-/* txn list */
 .txn-card{background:var(--bg);border-radius:var(--radius);padding:0 1rem;margin-top:10px;margin-bottom:5rem;}
 .date-search-row{display:flex;align-items:center;gap:8px;padding:0.875rem 0 0.75rem;border-bottom:0.5px solid var(--border);}
 .date-search-row i{font-size:16px;color:var(--text3);flex-shrink:0;}
@@ -92,6 +64,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .filter-row{display:flex;gap:6px;padding:0.75rem 0;border-bottom:0.5px solid var(--border);overflow-x:auto;}
 .filter-btn{font-size:12px;padding:4px 12px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);white-space:nowrap;flex-shrink:0;}
 .filter-btn.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+.sort-row{display:flex;gap:6px;padding:0.5rem 0 0.75rem;border-bottom:0.5px solid var(--border);align-items:center;}
+.sort-label{font-size:11px;color:var(--text3);flex-shrink:0;}
+.sort-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);white-space:nowrap;display:flex;align-items:center;gap:3px;}
+.sort-btn.active{background:var(--bg2);color:var(--text);}
+.sort-btn i{font-size:11px;}
 .txn-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;position:relative;}
 .txn-row:last-child{border-bottom:none;}
 .txn-row.selected{background:rgba(50,102,173,0.07);margin:0 -1rem;padding:10px 1rem;}
@@ -108,15 +85,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .txn-amt.in{color:var(--in);}
 .txn-chk{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;}
 .txn-chk.checked{background:var(--accent);border-color:var(--accent);}
-
-/* multiselect bar */
 .multibar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg);border-top:0.5px solid var(--border);padding:0.875rem 1.25rem;display:flex;align-items:center;gap:10px;z-index:30;}
 .multibar-count{font-size:13px;font-weight:500;flex:1;}
 .multibar-btn{font-size:12px;padding:7px 14px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text);white-space:nowrap;}
 .multibar-btn.primary{background:var(--accent);color:white;border-color:var(--accent);}
 .multibar-btn.cancel{color:var(--text3);}
-
-/* upload */
 .upload-wrap{padding:3rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1rem;}
 .upload-box{width:100%;background:var(--bg);border-radius:var(--radius);border:1.5px dashed var(--border2);padding:2.5rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;}
 .upload-box:hover{background:var(--bg2);}
@@ -124,8 +97,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .upload-box p{font-size:15px;color:var(--text2);}
 .upload-box small{font-size:12px;color:var(--text3);text-align:center;line-height:1.6;}
 .upload-hint{font-size:13px;color:var(--text3);text-align:center;line-height:1.7;}
-
-/* modals */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
 .modal{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:1.25rem 1.5rem 2rem;max-height:85vh;overflow-y:auto;}
 .modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 1rem;}
@@ -160,16 +131,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .budget-input-wrap{display:flex;align-items:center;gap:8px;}
 .budget-input-wrap span{font-size:18px;color:var(--text2);}
 .budget-field{flex:1;padding:10px 12px;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:16px;outline:none;}
-.budget-field:focus{border-color:var(--accent);}
 .day-summary{display:flex;gap:12px;margin-bottom:1rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border);}
 .day-sum-item{flex:1;}
 .day-sum-label{font-size:11px;color:var(--text2);margin-bottom:3px;}
 .day-sum-val{font-size:16px;font-weight:500;}
-.sort-row{display:flex;gap:6px;padding:0.5rem 0 0.75rem;border-bottom:0.5px solid var(--border);align-items:center;}
-.sort-label{font-size:11px;color:var(--text3);flex-shrink:0;}
-.sort-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);white-space:nowrap;display:flex;align-items:center;gap:3px;}
-.sort-btn.active{background:var(--bg2);color:var(--text);border-color:var(--border2);}
-.sort-btn i{font-size:11px;}
 .hidden{display:none;}
 </style>
 </head>
@@ -199,8 +164,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
       <div class="budget-track"><div class="budget-fill" id="budget-fill" style="width:0%"></div></div>
     </div>
   </div>
-
-  <!-- upload -->
   <div id="upload-view">
     <div class="upload-wrap">
       <div class="upload-box" id="drop-zone">
@@ -211,28 +174,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
       <p class="upload-hint">数据仅保存在本设备浏览器中<br>不会上传到任何服务器</p>
     </div>
   </div>
-
-  <!-- main -->
   <div id="main-view" class="hidden">
-    <!-- stats -->
-    <div class="section" id="stats-section">
-      <div class="stats-grid" id="stats-grid"></div>
-    </div>
-    <!-- chart -->
+    <div class="section"><div class="stats-grid" id="stats-grid"></div></div>
     <div class="section">
       <div class="chart-card">
         <div class="card-title">每日支出 <span class="card-hint">点柱子看当天明细</span></div>
         <div class="chart-wrap"><canvas id="daily-chart" role="img" aria-label="每日支出图">每日消费走势</canvas></div>
       </div>
     </div>
-    <!-- categories -->
     <div class="section">
       <div class="cat-card">
         <div class="card-title">消费分类 <span class="card-hint">点击查看明细</span></div>
         <div id="cat-list"></div>
       </div>
     </div>
-    <!-- txn list -->
     <div class="section">
       <div class="txn-card">
         <div class="date-search-row">
@@ -243,15 +198,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
         <div class="filter-row" id="filter-row"></div>
         <div class="sort-row" id="sort-row">
           <span class="sort-label">排序</span>
-          <button class="sort-btn active" data-sort="date">时间 <i class="ti ti-arrows-sort"></i></button>
+          <button class="sort-btn active" data-sort="date">时间 <i class="ti ti-sort-descending"></i></button>
           <button class="sort-btn" data-sort="amount">金额 <i class="ti ti-arrows-sort"></i></button>
         </div>
         <div id="txn-list"></div>
       </div>
     </div>
   </div>
-
-  <!-- multiselect bar -->
   <div class="multibar hidden" id="multibar">
     <span class="multibar-count" id="multibar-count">已选 0 条</span>
     <button class="multibar-btn" id="multi-cat-btn">改分类</button>
@@ -260,29 +213,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
   </div>
 </div>
 
-<!-- menu -->
 <div class="modal-bg hidden" id="menu-modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <button class="menu-btn" id="do-budget"><i class="ti ti-target"></i> 设定生活费备用预算</button>
+    <button class="menu-btn" id="do-budget"><i class="ti ti-target"></i> 设定备用生活费预算</button>
     <button class="menu-btn" id="do-export"><i class="ti ti-download"></i> 导出备份</button>
     <button class="menu-btn" id="do-import-json"><i class="ti ti-upload"></i> 从备份恢复</button>
     <button class="menu-btn danger" id="do-clear"><i class="ti ti-trash"></i> 清空数据</button>
   </div>
 </div>
 
-<!-- budget -->
 <div class="modal-bg hidden" id="budget-modal">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-close-row"><h3>备用生活费预算</h3><button class="close-btn" data-close="budget-modal">✕</button></div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.6">当月没有标记生活费来源收入时，用此预算代替。</p>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.6">没有标记生活费来源收入时使用。</p>
     <div class="budget-input-wrap"><span>¥</span><input type="number" class="budget-field" id="budget-input" placeholder="例如 2000"></div>
     <button class="save-btn" id="save-budget">保存</button>
   </div>
 </div>
 
-<!-- edit single -->
 <div class="modal-bg hidden" id="edit-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -305,7 +255,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
   </div>
 </div>
 
-<!-- batch cat -->
 <div class="modal-bg hidden" id="batch-cat-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -315,7 +264,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
   </div>
 </div>
 
-<!-- day detail -->
 <div class="modal-bg hidden" id="day-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -329,7 +277,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
   </div>
 </div>
 
-<!-- max txn modal -->
 <div class="modal-bg hidden" id="max-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -338,20 +285,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
   </div>
 </div>
 
-<!-- category detail -->
 <div class="modal-bg hidden" id="cat-detail-modal">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-close-row"><h3 id="cat-detail-title">分类明细</h3><button class="close-btn" data-close="cat-detail-modal">✕</button></div>
     <div class="day-summary">
       <div class="day-sum-item"><div class="day-sum-label">总支出</div><div class="day-sum-val out" id="cat-detail-total"></div></div>
-      <div class="day-sum-item"><div class="day-sum-label">笔数</div><div class="day-sum-val" id="cat-detail-count"></div></div>
+      <div class="day-sum-item"><div class="day-sum-label">笔数·日均</div><div class="day-sum-val" id="cat-detail-count"></div></div>
       <div class="day-sum-item"><div class="day-sum-label">生活费部分</div><div class="day-sum-val" id="cat-detail-life"></div></div>
     </div>
-    <div class="sort-row" id="cat-sort-row" style="margin-bottom:4px;">
+    <div class="sort-row" id="cat-sort-row">
       <span class="sort-label">排序</span>
       <button class="sort-btn" data-csort="date">时间 <i class="ti ti-arrows-sort"></i></button>
-      <button class="sort-btn active" data-csort="amount">金额 <i class="ti ti-arrows-sort"></i></button>
+      <button class="sort-btn active" data-csort="amount">金额 <i class="ti ti-sort-descending"></i></button>
     </div>
     <div id="cat-detail-list"></div>
   </div>
@@ -377,8 +323,9 @@ const catByKey=k=>CATS.find(c=>c.key===k)||CATS[CATS.length-1];
 let allTxns=[],months=[],mi=0,currentTab='all',filter='all';
 let dchart=null,editKey=null,settings={budget:0};
 let multiMode=false,selected=new Set();
-let sortBy='date',sortDir='desc'; // main list sort
-let catSortBy='amount',catSortDir='desc'; // category detail sort
+let sortBy='date',sortDir='desc';
+let catSortBy='amount',catSortDir='desc';
+let catDetailTxns=[];
 
 function load(){
   try{allTxns=JSON.parse(localStorage.getItem('txns')||'[]').map(t=>({...t,date:new Date(t.date),isLife:t.isLife!==false}));}catch(e){allTxns=[];}
@@ -393,7 +340,7 @@ const dk=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${Stri
 
 function parseExcelDate(raw){
   const n=parseFloat(raw);
-  if(!isNaN(n)&&n>40000){return new Date((n-25569)*86400*1000);}
+  if(!isNaN(n)&&n>40000)return new Date((n-25569)*86400*1000);
   const d=new Date(String(raw).replace(/\//g,'-'));
   return isNaN(d.getTime())?null:d;
 }
@@ -403,7 +350,10 @@ function parseXLSX(ab){
   const ws=wb.Sheets[wb.SheetNames[0]];
   const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:'yyyy-mm-dd hh:mm:ss'});
   let hi=-1,headers=[];
-  for(let i=0;i<rows.length;i++){const r=rows[i].map(c=>String(c||'').trim());if(r.some(c=>c.includes('时间'))&&r.some(c=>c.includes('金额'))){hi=i;headers=r;break;}}
+  for(let i=0;i<rows.length;i++){
+    const r=rows[i].map(c=>String(c||'').trim());
+    if(r.some(c=>c.includes('时间'))&&r.some(c=>c.includes('金额'))){hi=i;headers=r;break;}
+  }
   if(hi===-1)return null;
   const ci=f=>headers.findIndex(h=>h.includes(f));
   const cT=ci('时间'),cN=ci('交易对方'),cTy=ci('收/支')||ci('收支'),cA=ci('金额'),cR=ci('备注')||ci('商品'),cS=ci('状态'),cNo=ci('单号');
@@ -420,7 +370,8 @@ function parseXLSX(ab){
     const no=cNo>=0?p[cNo]:'';
     const rawN=(cN>=0?p[cN]:'')||(cR>=0?p[cR]:'')||'未知';
     const key=no||`${p[cT]}_${amt}_${rawN}`;
-    if(seen.has(key))continue;seen.add(key);
+    if(seen.has(key))continue;
+    seen.add(key);
     const ty=cTy>=0?p[cTy]:'';
     const isOut=ty.includes('支出')||(!ty.includes('收入')&&amt<0);
     txns.push({date,name:rawN,customName:'',remark:cR>=0?p[cR]:'',amount:Math.abs(amt),isOut,no,key,cat:guessCat(rawN),isLife:true,isIncomeLife:false});
@@ -429,8 +380,12 @@ function parseXLSX(ab){
 }
 
 function parseCSV(text){
-  const lines=text.split('\n');let hi=-1,headers=[];
-  for(let i=0;i<lines.length;i++){const l=lines[i].trim();if(l.includes('时间')&&l.includes('金额')){hi=i;headers=l.split(',').map(h=>h.replace(/"/g,'').trim());break;}}
+  const lines=text.split('\n');
+  let hi=-1,headers=[];
+  for(let i=0;i<lines.length;i++){
+    const l=lines[i].trim();
+    if(l.includes('时间')&&l.includes('金额')){hi=i;headers=l.split(',').map(h=>h.replace(/"/g,'').trim());break;}
+  }
   if(hi===-1)return null;
   const ci=f=>headers.findIndex(h=>h.includes(f));
   const cT=ci('时间'),cN=ci('交易对方'),cTy=ci('收/支')||ci('收支'),cA=ci('金额'),cR=ci('备注')||ci('商品'),cS=ci('状态'),cNo=ci('单号');
@@ -447,7 +402,8 @@ function parseCSV(text){
     const no=cNo>=0?p[cNo]:'';
     const rawN=(cN>=0?p[cN]:'')||(cR>=0?p[cR]:'')||'未知';
     const key=no||`${p[cT]}_${amt}_${rawN}`;
-    if(seen.has(key))continue;seen.add(key);
+    if(seen.has(key))continue;
+    seen.add(key);
     const ty=cTy>=0?p[cTy]:'';
     const isOut=ty.includes('支出')||(!ty.includes('收入')&&amt<0);
     txns.push({date,name:rawN,customName:'',remark:cR>=0?p[cR]:'',amount:Math.abs(amt),isOut,no,key,cat:guessCat(rawN),isLife:true,isIncomeLife:false});
@@ -457,25 +413,28 @@ function parseCSV(text){
 
 function merge(newT){const ex=new Set(allTxns.map(t=>t.key));let n=0;for(const t of newT)if(!ex.has(t.key)){allTxns.push(t);n++;}return n;}
 function buildMonths(){const s=new Set(allTxns.map(t=>mk(t.date)));months=[...s].sort().reverse();}
-
 function getMonthTxns(){return allTxns.filter(t=>mk(t.date)===months[mi]);}
 function getViewTxns(mT){
-  // for life tab, only show life-related
-  if(currentTab==='life') return mT.filter(t=>t.isOut?t.isLife:t.isIncomeLife);
+  if(currentTab==='life')return mT.filter(t=>t.isOut?t.isLife:t.isIncomeLife);
   return mT;
 }
 
-function txnHTML(t,showDate=false,showChk=false){
+function txnHTML(t,showDate,showChk){
   const c=catByKey(t.cat);
   const dn=t.customName||t.name;
   const ds=showDate
     ?`${t.date.getMonth()+1}/${t.date.getDate()} ${String(t.date.getHours()).padStart(2,'0')}:${String(t.date.getMinutes()).padStart(2,'0')}`
     :`${String(t.date.getHours()).padStart(2,'0')}:${String(t.date.getMinutes()).padStart(2,'0')}`;
   const tag=t.isOut?(t.isLife?'<span class="tag tag-life">生活费</span>':'<span class="tag tag-nonlife">非生活费</span>'):(t.isIncomeLife?'<span class="tag tag-life">生活费来源</span>':'');
-  const chk=showChk?`<div class="txn-chk${selected.has(t.key)?' checked':''}" aria-hidden="true">${selected.has(t.key)?'✓':''}</div>`:'';
-  return`${chk}<div class="txn-ico" style="background:${c.color}22"><i class="ti ${c.icon}" style="color:${c.color}"></i></div>
-<div class="txn-info"><div class="txn-name">${dn.length>18?dn.slice(0,18)+'…':dn}</div><div class="txn-meta">${ds} · ${c.key} ${tag}</div></div>
-<div class="txn-amt ${t.isOut?'out':'in'}">${t.isOut?'-':'+'}${fmtF(t.amount)}</div>`;
+  const chk=showChk?`<div class="txn-chk${selected.has(t.key)?' checked':''}">${selected.has(t.key)?'✓':''}</div>`:'';
+  return `${chk}<div class="txn-ico" style="background:${c.color}22"><i class="ti ${c.icon}" style="color:${c.color}"></i></div><div class="txn-info"><div class="txn-name">${dn.length>18?dn.slice(0,18)+'…':dn}</div><div class="txn-meta">${ds} · ${c.key} ${tag}</div></div><div class="txn-amt ${t.isOut?'out':'in'}">${t.isOut?'-':'+'}${fmtF(t.amount)}</div>`;
+}
+
+function sortTxns(arr,by,dir){
+  return [...arr].sort((a,b)=>{
+    const v=by==='amount'?(a.amount-b.amount):(a.date-b.date);
+    return dir==='asc'?v:-v;
+  });
 }
 
 function render(){
@@ -496,43 +455,36 @@ function render(){
   document.getElementById('month-label').textContent=`${y}年${m}月`;
   const mT=getMonthTxns();
   const vT=getViewTxns(mT);
-  const out=vT.filter(t=>t.isOut),inn=vT.filter(t=>!t.isOut);
+  const out=vT.filter(t=>t.isOut);
+  const inn=vT.filter(t=>!t.isOut);
   const tOut=out.reduce((s,t)=>s+t.amount,0);
   const tIn=inn.reduce((s,t)=>s+t.amount,0);
   const days=new Date(y,m,0).getDate();
-  // days with actual spending
   const activeDays=new Set(out.map(t=>t.date.getDate())).size||1;
-
-  // life income total (always from full month)
   const lIn=mT.filter(t=>!t.isOut&&t.isIncomeLife).reduce((s,t)=>s+t.amount,0);
   const lOut=mT.filter(t=>t.isOut&&t.isLife).reduce((s,t)=>s+t.amount,0);
   const lifeTotal=lIn>0?lIn:(settings.budget||0);
+  const maxTxn=out.reduce((a,b)=>a.amount>b.amount?a:b,{amount:0,name:'—',customName:''});
 
-  // max single txn
-  const maxTxn=out.reduce((a,b)=>a.amount>b.amount?a:b,{amount:0,name:'—'});
-
-  // stats
   const grid=document.getElementById('stats-grid');
   if(currentTab==='all'){
     grid.innerHTML=`
       <div class="stat-card"><div class="stat-label">本月总支出</div><div class="stat-value out">${fmt(tOut)}</div><div class="stat-sub">${out.length} 笔支出</div></div>
       <div class="stat-card"><div class="stat-label">本月总收入</div><div class="stat-value in">${fmt(tIn)}</div><div class="stat-sub">${inn.length} 笔收入</div></div>
       <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value ${lifeTotal>0?(lOut<=lifeTotal?'ok':'over'):''}">${fmt(lOut)}</div><div class="stat-sub">${lifeTotal>0?(lOut<=lifeTotal?`还剩 ${fmt(lifeTotal-lOut)}`:`超支 ${fmt(lOut-lifeTotal)}`):'标记来源或设预算'}</div></div>
-      <div class="stat-card" id="max-txn-card" style="cursor:pointer"><div class="stat-label">最大单笔 ↗</div><div class="stat-value">${fmt(maxTxn.amount)}</div><div class="stat-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(maxTxn.customName||maxTxn.name||'—').slice(0,10)}</div></div>
+      <div class="stat-card" id="max-card" style="cursor:pointer"><div class="stat-label">最大单笔 ↗</div><div class="stat-value">${fmt(maxTxn.amount)}</div><div class="stat-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(maxTxn.customName||maxTxn.name||'—').slice(0,10)}</div></div>
       <div class="stat-card"><div class="stat-label">日均支出</div><div class="stat-value">${fmt(tOut/activeDays)}</div><div class="stat-sub">${activeDays} 天有消费</div></div>`;
-    document.getElementById('max-txn-card').onclick=()=>openMaxModal(out,'全月大额支出');
+    document.getElementById('max-card').onclick=()=>openMaxModal(out,'全月大额支出');
   } else {
     const lifeActiveDays=new Set(out.map(t=>t.date.getDate())).size||1;
     grid.innerHTML=`
       <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value out">${fmt(lOut)}</div><div class="stat-sub">${out.length} 笔</div></div>
       <div class="stat-card"><div class="stat-label">${lIn>0?'来源收入':'备用预算'}</div><div class="stat-value in">${fmt(lifeTotal)}</div><div class="stat-sub">${lifeTotal>0?(lOut<=lifeTotal?`剩 ${fmt(lifeTotal-lOut)}`:`超 ${fmt(lOut-lifeTotal)}`):'未设定'}</div></div>
       <div class="stat-card"><div class="stat-label">日均生活费</div><div class="stat-value">${fmt(lOut/lifeActiveDays)}</div><div class="stat-sub">${lifeActiveDays} 天有消费</div></div>
-      <div class="stat-card" id="max-txn-card" style="cursor:pointer"><div class="stat-label">最大单笔 ↗</div><div class="stat-value">${fmt(maxTxn.amount)}</div><div class="stat-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(maxTxn.customName||maxTxn.name||'—').slice(0,10)}</div></div>`;
-    document.getElementById('max-txn-card').onclick=()=>openMaxModal(out,'生活费大额支出');
-  }
+      <div class="stat-card" id="max-card" style="cursor:pointer"><div class="stat-label">最大单笔 ↗</div><div class="stat-value">${fmt(maxTxn.amount)}</div><div class="stat-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(maxTxn.customName||maxTxn.name||'—').slice(0,10)}</div></div>`;
+    document.getElementById('max-card').onclick=()=>openMaxModal(out,'生活费大额支出');
   }
 
-  // budget bar
   if(lifeTotal>0){
     document.getElementById('budget-bar-section').classList.remove('hidden');
     const pct=Math.min(lOut/lifeTotal*100,100);
@@ -564,14 +516,14 @@ function renderChart(out,y,m,days){
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'¥'+c.parsed.y.toFixed(2)}}},
       scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:10},maxTicksLimit:12,autoSkip:true}},y:{grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>'¥'+v}}},
-      onClick:(e,els)=>{if(!els.length)return;const [y2,m2]=months[mi].split('-').map(Number);openDayModal(new Date(y2,m2-1,els[0].index+1));}
+      onClick:(e,els)=>{if(!els.length)return;const[y2,m2]=months[mi].split('-').map(Number);openDayModal(new Date(y2,m2-1,els[0].index+1));}
     }
   });
 }
 
 function renderCats(out){
   const map={};
-  out.forEach(t=>{const c=catByKey(t.cat);if(!map[c.key])map[c.key]={...c,total:0,count:0};map[c.key].total+=t.amount;map[c.key].count++;});
+  out.forEach(t=>{const c=catByKey(t.cat);if(!map[c.key])map[c.key]={...c,total:0};map[c.key].total+=t.amount;});
   const list=Object.values(map).sort((a,b)=>b.total-a.total);
   const mx=list[0]?.total||1;
   document.getElementById('cat-list').innerHTML=list.map(c=>`
@@ -579,7 +531,7 @@ function renderCats(out){
       <div class="cat-ico" style="background:${c.color}22"><i class="ti ${c.icon}" style="color:${c.color}"></i></div>
       <span class="cat-name">${c.key}</span>
       <div class="cat-bar-bg"><div class="cat-bar" style="width:${Math.round(c.total/mx*100)}%;background:${c.color}"></div></div>
-      <div class="cat-right"><span class="cat-amt">${fmt(c.total)}</span><i class="ti ti-chevron-right cat-arrow" aria-hidden="true"></i></div>
+      <div class="cat-right"><span class="cat-amt">${fmt(c.total)}</span><i class="ti ti-chevron-right cat-arrow"></i></div>
     </div>`).join('')||'<p style="font-size:13px;color:var(--text3)">暂无数据</p>';
 }
 
@@ -592,31 +544,22 @@ function renderFilterBtns(){
 
 function getFilteredTxns(vT){
   if(currentTab==='life'){
-    if(filter==='out') return vT.filter(t=>t.isOut);
-    if(filter==='in') return vT.filter(t=>!t.isOut);
+    if(filter==='out')return vT.filter(t=>t.isOut);
+    if(filter==='in')return vT.filter(t=>!t.isOut);
     return vT;
   }
-  if(filter==='out') return vT.filter(t=>t.isOut);
-  if(filter==='in') return vT.filter(t=>!t.isOut);
-  if(filter==='life') return vT.filter(t=>t.isOut&&t.isLife);
-  if(filter==='nonlife') return vT.filter(t=>t.isOut&&!t.isLife);
+  if(filter==='out')return vT.filter(t=>t.isOut);
+  if(filter==='in')return vT.filter(t=>!t.isOut);
+  if(filter==='life')return vT.filter(t=>t.isOut&&t.isLife);
+  if(filter==='nonlife')return vT.filter(t=>t.isOut&&!t.isLife);
   return vT;
 }
 
-function sortTxns(arr,by,dir){
-  return [...arr].sort((a,b)=>{
-    const v=by==='amount'?(a.amount-b.amount):(a.date-b.date);
-    return dir==='asc'?v:-v;
-  });
-}
-
-function updateSortBtns(){
+function updateMainSortBtns(){
   document.querySelectorAll('#sort-row .sort-btn').forEach(b=>{
     const active=b.dataset.sort===sortBy;
     b.classList.toggle('active',active);
-    const icon=b.querySelector('i');
-    if(active) icon.className=sortDir==='desc'?'ti ti-sort-descending':'ti ti-sort-ascending';
-    else icon.className='ti ti-arrows-sort';
+    b.querySelector('i').className=active?(sortDir==='desc'?'ti ti-sort-descending':'ti ti-sort-ascending'):'ti ti-arrows-sort';
   });
 }
 
@@ -625,59 +568,29 @@ function renderTxns(vT){
   const sorted=sortTxns(f,sortBy,sortDir);
   document.getElementById('txn-list').innerHTML=sorted.map(t=>`<div class="txn-row${selected.has(t.key)?' selected':''}" data-key="${t.key}">${txnHTML(t,true,multiMode)}</div>`).join('')
     ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">暂无记录</p>';
-  updateSortBtns();
+  updateMainSortBtns();
 }
 
-// max txn modal
 function openMaxModal(txns,title){
-  const sorted=sortTxns(txns,'amount','desc');
   document.getElementById('max-modal-title').textContent=title;
-  document.getElementById('max-modal-list').innerHTML=sorted.map(t=>`<div class="txn-row" data-key="${t.key}" style="border-bottom:0.5px solid var(--border)">${txnHTML(t,true,false)}</div>`).join('');
+  document.getElementById('max-modal-list').innerHTML=sortTxns(txns,'amount','desc').map(t=>`<div class="txn-row" data-key="${t.key}" style="border-bottom:0.5px solid var(--border)">${txnHTML(t,true,false)}</div>`).join('');
   openM('max-modal');
 }
-document.getElementById('max-modal-list').addEventListener('click',e=>{const r=e.target.closest('.txn-row');if(r){closeM('max-modal');openEditModal(r.dataset.key);}});
 
-// category detail modal
-let catDetailTxns=[];
-function renderCatDetailList(){
-  const sorted=sortTxns(catDetailTxns,catSortBy,catSortDir);
-  document.getElementById('cat-detail-list').innerHTML=sorted.map(t=>`<div class="txn-row" data-key="${t.key}" style="border-bottom:0.5px solid var(--border)">${txnHTML(t,true,false)}</div>`).join('')
-    ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">暂无记录</p>';
+function updateCatSortBtns(){
   document.querySelectorAll('#cat-sort-row .sort-btn').forEach(b=>{
     const active=b.dataset.csort===catSortBy;
     b.classList.toggle('active',active);
-    const icon=b.querySelector('i');
-    if(active) icon.className=catSortDir==='desc'?'ti ti-sort-descending':'ti ti-sort-ascending';
-    else icon.className='ti ti-arrows-sort';
+    b.querySelector('i').className=active?(catSortDir==='desc'?'ti ti-sort-descending':'ti ti-sort-ascending'):'ti ti-arrows-sort';
   });
 }
 
-document.getElementById('cat-list').addEventListener('click',e=>{
-  const row=e.target.closest('.cat-row');if(!row)return;
-  const catKey=row.dataset.cat;
-  const mT=getMonthTxns(),vT=getViewTxns(mT);
-  catDetailTxns=vT.filter(t=>t.isOut&&t.cat===catKey);
-  const total=catDetailTxns.reduce((s,t)=>s+t.amount,0);
-  const lifeAmt=catDetailTxns.filter(t=>t.isLife).reduce((s,t)=>s+t.amount,0);
-  const c=catByKey(catKey);
-  document.getElementById('cat-detail-title').textContent=`${c.key} 明细`;
-  document.getElementById('cat-detail-total').textContent=fmtF(total);
-  document.getElementById('cat-detail-count').textContent=catDetailTxns.length+' 笔';
-  document.getElementById('cat-detail-life').textContent=fmtF(lifeAmt);
-  catSortBy='amount';catSortDir='desc';
-  renderCatDetailList();
-  openM('cat-detail-modal');
-});
-document.getElementById('cat-sort-row').addEventListener('click',e=>{
-  const b=e.target.closest('.sort-btn');if(!b)return;
-  const s=b.dataset.csort;
-  if(catSortBy===s) catSortDir=catSortDir==='desc'?'asc':'desc';
-  else{catSortBy=s;catSortDir=s==='amount'?'desc':'desc';}
-  renderCatDetailList();
-});
-document.getElementById('cat-detail-list').addEventListener('click',e=>{const r=e.target.closest('.txn-row');if(r){closeM('cat-detail-modal');openEditModal(r.dataset.key);}});
+function renderCatDetailList(){
+  document.getElementById('cat-detail-list').innerHTML=sortTxns(catDetailTxns,catSortBy,catSortDir).map(t=>`<div class="txn-row" data-key="${t.key}" style="border-bottom:0.5px solid var(--border)">${txnHTML(t,true,false)}</div>`).join('')
+    ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">暂无记录</p>';
+  updateCatSortBtns();
+}
 
-// day modal
 function openDayModal(date){
   const d=dk(date),dayT=allTxns.filter(t=>dk(t.date)===d).sort((a,b)=>b.date-a.date);
   document.getElementById('day-title').textContent=`${date.getMonth()+1}月${date.getDate()}日`;
@@ -688,9 +601,7 @@ function openDayModal(date){
     ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">当天无记录</p>';
   openM('day-modal');
 }
-document.getElementById('day-list').addEventListener('click',e=>{const r=e.target.closest('.txn-row');if(r){closeM('day-modal');openEditModal(r.dataset.key);}});
 
-// edit modal
 function openEditModal(key){
   const t=allTxns.find(x=>x.key===key);if(!t)return;
   editKey=key;
@@ -703,6 +614,54 @@ function openEditModal(key){
   grid.querySelectorAll('.cat-option').forEach(b=>{b.onclick=()=>{grid.querySelectorAll('.cat-option').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};});
   openM('edit-modal');
 }
+
+// events
+const openM=id=>document.getElementById(id).classList.remove('hidden');
+const closeM=id=>document.getElementById(id).classList.add('hidden');
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeM(b.dataset.close));
+document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.add('hidden');}));
+
+document.getElementById('cat-list').addEventListener('click',e=>{
+  const row=e.target.closest('.cat-row');if(!row)return;
+  const catKey=row.dataset.cat;
+  const out=getViewTxns(getMonthTxns()).filter(t=>t.isOut);
+  catDetailTxns=out.filter(t=>t.cat===catKey);
+  const total=catDetailTxns.reduce((s,t)=>s+t.amount,0);
+  const lifeAmt=catDetailTxns.filter(t=>t.isLife).reduce((s,t)=>s+t.amount,0);
+  const activeDays=new Set(catDetailTxns.map(t=>t.date.getDate())).size||1;
+  const c=catByKey(catKey);
+  document.getElementById('cat-detail-title').textContent=`${c.key} 明细`;
+  document.getElementById('cat-detail-total').textContent=fmtF(total);
+  document.getElementById('cat-detail-count').textContent=`${catDetailTxns.length}笔 · ${fmt(total/activeDays)}/天`;
+  document.getElementById('cat-detail-life').textContent=fmtF(lifeAmt);
+  catSortBy='amount';catSortDir='desc';
+  renderCatDetailList();
+  openM('cat-detail-modal');
+});
+
+document.getElementById('cat-sort-row').addEventListener('click',e=>{
+  const b=e.target.closest('.sort-btn');if(!b)return;
+  const s=b.dataset.csort;
+  if(catSortBy===s)catSortDir=catSortDir==='desc'?'asc':'desc';
+  else{catSortBy=s;catSortDir='desc';}
+  renderCatDetailList();
+});
+
+document.getElementById('cat-detail-list').addEventListener('click',e=>{
+  const r=e.target.closest('.txn-row');if(!r)return;
+  closeM('cat-detail-modal');openEditModal(r.dataset.key);
+});
+
+document.getElementById('max-modal-list').addEventListener('click',e=>{
+  const r=e.target.closest('.txn-row');if(!r)return;
+  closeM('max-modal');openEditModal(r.dataset.key);
+});
+
+document.getElementById('day-list').addEventListener('click',e=>{
+  const r=e.target.closest('.txn-row');if(!r)return;
+  closeM('day-modal');openEditModal(r.dataset.key);
+});
+
 document.getElementById('save-edit').onclick=()=>{
   const t=allTxns.find(x=>x.key===editKey);if(!t)return;
   const sel=document.querySelector('#edit-cat-grid .cat-option.selected');
@@ -713,7 +672,6 @@ document.getElementById('save-edit').onclick=()=>{
   save();render();closeM('edit-modal');
 };
 
-// txn list click — single tap edit, long press multi-select
 let pressTimer=null;
 document.getElementById('txn-list').addEventListener('pointerdown',e=>{
   const r=e.target.closest('.txn-row');if(!r)return;
@@ -723,30 +681,15 @@ document.getElementById('txn-list').addEventListener('pointerup',()=>{if(pressTi
 document.getElementById('txn-list').addEventListener('pointercancel',()=>{if(pressTimer){clearTimeout(pressTimer);pressTimer=null;}});
 document.getElementById('txn-list').addEventListener('click',e=>{
   const r=e.target.closest('.txn-row');if(!r)return;
-  if(multiMode){toggleSelect(r.dataset.key);}
-  else{openEditModal(r.dataset.key);}
+  if(multiMode)toggleSelect(r.dataset.key);
+  else openEditModal(r.dataset.key);
 });
 
-function enterMulti(key){
-  multiMode=true;selected.clear();selected.add(key);
-  document.getElementById('multibar').classList.remove('hidden');
-  updateMultiBar();
-  renderTxns(getViewTxns(getMonthTxns()));
-}
-function toggleSelect(key){
-  if(selected.has(key))selected.delete(key);else selected.add(key);
-  if(selected.size===0){exitMulti();return;}
-  updateMultiBar();
-  renderTxns(getViewTxns(getMonthTxns()));
-}
-function exitMulti(){
-  multiMode=false;selected.clear();
-  document.getElementById('multibar').classList.add('hidden');
-  renderTxns(getViewTxns(getMonthTxns()));
-}
-function updateMultiBar(){
-  document.getElementById('multibar-count').textContent=`已选 ${selected.size} 条`;
-}
+function enterMulti(key){multiMode=true;selected.clear();selected.add(key);document.getElementById('multibar').classList.remove('hidden');updateMultiBar();renderTxns(getViewTxns(getMonthTxns()));}
+function toggleSelect(key){if(selected.has(key))selected.delete(key);else selected.add(key);if(!selected.size){exitMulti();return;}updateMultiBar();renderTxns(getViewTxns(getMonthTxns()));}
+function exitMulti(){multiMode=false;selected.clear();document.getElementById('multibar').classList.add('hidden');renderTxns(getViewTxns(getMonthTxns()));}
+function updateMultiBar(){document.getElementById('multibar-count').textContent=`已选 ${selected.size} 条`;}
+
 document.getElementById('multi-cancel-btn').onclick=exitMulti;
 document.getElementById('multi-life-btn').onclick=()=>{
   const keys=[...selected];
@@ -762,13 +705,11 @@ document.getElementById('multi-cat-btn').onclick=()=>{
   openM('batch-cat-modal');
 };
 document.getElementById('save-batch-cat').onclick=()=>{
-  const sel=document.querySelector('#batch-cat-grid .cat-option.selected');
-  if(!sel)return;
+  const sel=document.querySelector('#batch-cat-grid .cat-option.selected');if(!sel)return;
   [...selected].forEach(k=>{const t=allTxns.find(x=>x.key===k);if(t)t.cat=sel.dataset.cat;});
   save();closeM('batch-cat-modal');exitMulti();render();
 };
 
-// tabs
 document.getElementById('tabs').addEventListener('click',e=>{
   const t=e.target.closest('.tab');if(!t)return;
   currentTab=t.dataset.tab;filter='all';
@@ -777,16 +718,14 @@ document.getElementById('tabs').addEventListener('click',e=>{
   render();
 });
 
-// sort
 document.getElementById('sort-row').addEventListener('click',e=>{
   const b=e.target.closest('.sort-btn');if(!b)return;
   const s=b.dataset.sort;
-  if(sortBy===s) sortDir=sortDir==='desc'?'asc':'desc';
-  else{sortBy=s;sortDir=s==='amount'?'desc':'desc';}
+  if(sortBy===s)sortDir=sortDir==='desc'?'asc':'desc';
+  else{sortBy=s;sortDir='desc';}
   renderTxns(getViewTxns(getMonthTxns()));
 });
 
-// filter
 document.getElementById('filter-row').addEventListener('click',e=>{
   const b=e.target.closest('.filter-btn');if(!b)return;
   filter=b.dataset.f;
@@ -795,20 +734,24 @@ document.getElementById('filter-row').addEventListener('click',e=>{
   renderTxns(getViewTxns(getMonthTxns()));
 });
 
-// budget
 document.getElementById('save-budget').onclick=()=>{
   const v=parseFloat(document.getElementById('budget-input').value);
   if(!isNaN(v)&&v>=0){settings.budget=v;saveS();render();closeM('budget-modal');}
 };
 document.getElementById('do-budget').onclick=()=>{document.getElementById('budget-input').value=settings.budget||'';closeM('menu-modal');openM('budget-modal');};
+document.getElementById('menu-btn').onclick=()=>openM('menu-modal');
+document.getElementById('do-export').onclick=()=>{
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(allTxns)],{type:'application/json'}));a.download='bill-backup.json';a.click();closeM('menu-modal');
+};
+document.getElementById('do-import-json').onclick=()=>{closeM('menu-modal');document.getElementById('file-json').click();};
+document.getElementById('file-json').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{try{const d=JSON.parse(ev.target.result).map(t=>({...t,date:new Date(t.date),isLife:t.isLife!==false}));const n=merge(d);save();buildMonths();mi=0;render();alert(`导入完成，新增 ${n} 条`);}catch(e){alert('文件格式错误');}};
+  r.readAsText(f);e.target.value='';
+};
+document.getElementById('do-clear').onclick=()=>{if(confirm('确认清空所有数据？')){allTxns=[];save();buildMonths();render();closeM('menu-modal');}};
 
-// modals
-const openM=id=>document.getElementById(id).classList.remove('hidden');
-const closeM=id=>document.getElementById(id).classList.add('hidden');
-document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeM(b.dataset.close));
-document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.add('hidden');}));
-
-// import
 document.getElementById('import-btn').onclick=()=>document.getElementById('file-bill').click();
 document.getElementById('drop-zone').onclick=()=>document.getElementById('file-bill').click();
 function handleTxns(txns){
@@ -823,25 +766,9 @@ document.getElementById('file-bill').onchange=e=>{
   e.target.value='';
 };
 
-// menu
-document.getElementById('menu-btn').onclick=()=>openM('menu-modal');
-document.getElementById('do-export').onclick=()=>{
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(allTxns)],{type:'application/json'}));a.download='bill-backup.json';a.click();closeM('menu-modal');
-};
-document.getElementById('do-import-json').onclick=()=>{closeM('menu-modal');document.getElementById('file-json').click();};
-document.getElementById('file-json').onchange=e=>{
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{try{const d=JSON.parse(ev.target.result).map(t=>({...t,date:new Date(t.date),isLife:t.isLife!==false}));const n=merge(d);save();buildMonths();mi=0;render();alert(`导入完成，新增 ${n} 条`);}catch(e){alert('文件格式错误');}};
-  r.readAsText(f);e.target.value='';
-};
-document.getElementById('do-clear').onclick=()=>{if(confirm('确认清空所有数据？')){allTxns=[];save();buildMonths();render();closeM('menu-modal');}};
-
-// month nav
 document.getElementById('prev-month').onclick=()=>{if(mi<months.length-1){mi++;render();}};
 document.getElementById('next-month').onclick=()=>{if(mi>0){mi--;render();}};
 
-// date search
 document.getElementById('date-go-btn').onclick=()=>{
   const v=document.getElementById('date-input').value;if(!v)return;
   const date=new Date(v+'T00:00:00');if(isNaN(date.getTime()))return;
@@ -852,11 +779,14 @@ document.getElementById('date-go-btn').onclick=()=>{
 };
 document.getElementById('date-input').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('date-go-btn').click();});
 
-// drag drop
 const dz=document.getElementById('drop-zone');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.background='var(--bg2)';});
 dz.addEventListener('dragleave',()=>dz.style.background='');
-dz.addEventListener('drop',e=>{e.preventDefault();dz.style.background='';const f=e.dataTransfer.files[0];if(f){const dt=new DataTransfer();dt.items.add(f);document.getElementById('file-bill').files=dt.files;document.getElementById('file-bill').dispatchEvent(new Event('change'));}});
+dz.addEventListener('drop',e=>{
+  e.preventDefault();dz.style.background='';
+  const f=e.dataTransfer.files[0];
+  if(f){const dt=new DataTransfer();dt.items.add(f);document.getElementById('file-bill').files=dt.files;document.getElementById('file-bill').dispatchEvent(new Event('change'));}
+});
 
 load();buildMonths();render();
 </script>
