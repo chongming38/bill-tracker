@@ -489,14 +489,13 @@ function render(){
       <div class="stat-card"><div class="stat-label">本月总支出</div><div class="stat-value out">${fmt(tOut)}</div><div class="stat-sub">${out.length} 笔支出</div></div>
       <div class="stat-card"><div class="stat-label">本月总收入</div><div class="stat-value in">${fmt(tIn)}</div><div class="stat-sub">${inn.length} 笔收入</div></div>
       <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value ${lifeTotal>0?(lOut<=lifeTotal?'ok':'over'):''}">${fmt(lOut)}</div><div class="stat-sub">${lifeTotal>0?(lOut<=lifeTotal?`还剩 ${fmt(lifeTotal-lOut)}`:`超支 ${fmt(lOut-lifeTotal)}`):'标记来源或设预算'}</div></div>
-      <div class="stat-card"><div class="stat-label">日均支出</div><div class="stat-value">${fmt(tOut/days)}</div><div class="stat-sub">平均每天</div></div>`;
+      <div class="stat-card"><div class="stat-label">日均支出</div><div class="stat-value">${fmt(tOut/activeDays)}</div><div class="stat-sub">${activeDays} 天有消费</div></div>`;
   } else {
-    // life tab stats
-    const lDays=days;
+    const lifeActiveDays=new Set(out.map(t=>t.date.getDate())).size||1;
     grid.innerHTML=`
       <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value out">${fmt(lOut)}</div><div class="stat-sub">${out.length} 笔</div></div>
       <div class="stat-card"><div class="stat-label">${lIn>0?'来源收入':'备用预算'}</div><div class="stat-value in">${fmt(lifeTotal)}</div><div class="stat-sub">${lifeTotal>0?(lOut<=lifeTotal?`剩 ${fmt(lifeTotal-lOut)}`:`超 ${fmt(lOut-lifeTotal)}`):'未设定'}</div></div>
-      <div class="stat-card"><div class="stat-label">日均生活费</div><div class="stat-value">${fmt(lOut/lDays)}</div><div class="stat-sub">平均每天</div></div>
+      <div class="stat-card"><div class="stat-label">日均生活费</div><div class="stat-value">${fmt(lOut/lifeActiveDays)}</div><div class="stat-sub">${lifeActiveDays} 天有消费</div></div>
       <div class="stat-card"><div class="stat-label">生活费笔数</div><div class="stat-value">${out.length}</div><div class="stat-sub">笔支出</div></div>`;
   }
 
