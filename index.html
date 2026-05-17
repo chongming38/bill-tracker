@@ -475,7 +475,7 @@ function renderTxns(mT){
   else if(filter==='life')f=mT.filter(t=>t.isOut&&t.isLife);
   else if(filter==='nonlife')f=mT.filter(t=>t.isOut&&!t.isLife);
   else f=mT;
-  const sorted=[...f].sort((a,b)=>b.date-a.date).slice(0,80);
+  const sorted=[...f].sort((a,b)=>b.date-a.date);
   document.getElementById('txn-list').innerHTML=sorted.map(t=>`<div class="txn-row" data-key="${t.key}">${txnHTML(t,true)}</div>`).join('')
     ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">暂无记录</p>';
 }
@@ -572,9 +572,8 @@ document.getElementById('do-clear').onclick=()=>{if(confirm('确认清空所有�
 document.getElementById('date-go-btn').onclick=()=>{
   const v=document.getElementById('date-input').value;
   if(!v)return;
-  const date=new Date(v);
+  const date=new Date(v+'T00:00:00');
   if(isNaN(date.getTime()))return;
-  // switch to correct month if needed
   const targetMk=mk(date);
   const idx=months.indexOf(targetMk);
   if(idx===-1){alert('该日期没有账单记录');return;}
@@ -582,6 +581,9 @@ document.getElementById('date-go-btn').onclick=()=>{
   openDayModal(date);
 };
 document.getElementById('date-input').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('date-go-btn').click();});
+
+document.getElementById('prev-month').onclick=()=>{if(mi<months.length-1){mi++;render();}};
+document.getElementById('next-month').onclick=()=>{if(mi>0){mi--;render();}};
 
 const dz=document.getElementById('drop-zone');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.background='var(--bg2)';});
