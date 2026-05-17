@@ -165,6 +165,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .day-sum-item{flex:1;}
 .day-sum-label{font-size:11px;color:var(--text2);margin-bottom:3px;}
 .day-sum-val{font-size:16px;font-weight:500;}
+.sort-row{display:flex;gap:6px;padding:0.5rem 0 0.75rem;border-bottom:0.5px solid var(--border);align-items:center;}
+.sort-label{font-size:11px;color:var(--text3);flex-shrink:0;}
+.sort-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);white-space:nowrap;display:flex;align-items:center;gap:3px;}
+.sort-btn.active{background:var(--bg2);color:var(--text);border-color:var(--border2);}
+.sort-btn i{font-size:11px;}
 .hidden{display:none;}
 </style>
 </head>
@@ -236,6 +241,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
           <button id="date-go-btn" class="date-go-btn">查看</button>
         </div>
         <div class="filter-row" id="filter-row"></div>
+        <div class="sort-row" id="sort-row">
+          <span class="sort-label">排序</span>
+          <button class="sort-btn active" data-sort="date">时间 <i class="ti ti-arrows-sort"></i></button>
+          <button class="sort-btn" data-sort="amount">金额 <i class="ti ti-arrows-sort"></i></button>
+        </div>
         <div id="txn-list"></div>
       </div>
     </div>
@@ -319,6 +329,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
   </div>
 </div>
 
+<!-- max txn modal -->
+<div class="modal-bg hidden" id="max-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-close-row"><h3 id="max-modal-title">大额支出</h3><button class="close-btn" data-close="max-modal">✕</button></div>
+    <div id="max-modal-list"></div>
+  </div>
+</div>
+
 <!-- category detail -->
 <div class="modal-bg hidden" id="cat-detail-modal">
   <div class="modal">
@@ -328,6 +347,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
       <div class="day-sum-item"><div class="day-sum-label">总支出</div><div class="day-sum-val out" id="cat-detail-total"></div></div>
       <div class="day-sum-item"><div class="day-sum-label">笔数</div><div class="day-sum-val" id="cat-detail-count"></div></div>
       <div class="day-sum-item"><div class="day-sum-label">生活费部分</div><div class="day-sum-val" id="cat-detail-life"></div></div>
+    </div>
+    <div class="sort-row" id="cat-sort-row" style="margin-bottom:4px;">
+      <span class="sort-label">排序</span>
+      <button class="sort-btn" data-csort="date">时间 <i class="ti ti-arrows-sort"></i></button>
+      <button class="sort-btn active" data-csort="amount">金额 <i class="ti ti-arrows-sort"></i></button>
     </div>
     <div id="cat-detail-list"></div>
   </div>
@@ -353,6 +377,8 @@ const catByKey=k=>CATS.find(c=>c.key===k)||CATS[CATS.length-1];
 let allTxns=[],months=[],mi=0,currentTab='all',filter='all';
 let dchart=null,editKey=null,settings={budget:0};
 let multiMode=false,selected=new Set();
+let sortBy='date',sortDir='desc'; // main list sort
+let catSortBy='amount',catSortDir='desc'; // category detail sort
 
 function load(){
   try{allTxns=JSON.parse(localStorage.getItem('txns')||'[]').map(t=>({...t,date:new Date(t.date),isLife:t.isLife!==false}));}catch(e){allTxns=[];}
@@ -482,6 +508,9 @@ function render(){
   const lOut=mT.filter(t=>t.isOut&&t.isLife).reduce((s,t)=>s+t.amount,0);
   const lifeTotal=lIn>0?lIn:(settings.budget||0);
 
+  // max single txn
+  const maxTxn=out.reduce((a,b)=>a.amount>b.amount?a:b,{amount:0,name:'—'});
+
   // stats
   const grid=document.getElementById('stats-grid');
   if(currentTab==='all'){
@@ -489,14 +518,18 @@ function render(){
       <div class="stat-card"><div class="stat-label">本月总支出</div><div class="stat-value out">${fmt(tOut)}</div><div class="stat-sub">${out.length} 笔支出</div></div>
       <div class="stat-card"><div class="stat-label">本月总收入</div><div class="stat-value in">${fmt(tIn)}</div><div class="stat-sub">${inn.length} 笔收入</div></div>
       <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value ${lifeTotal>0?(lOut<=lifeTotal?'ok':'over'):''}">${fmt(lOut)}</div><div class="stat-sub">${lifeTotal>0?(lOut<=lifeTotal?`还剩 ${fmt(lifeTotal-lOut)}`:`超支 ${fmt(lOut-lifeTotal)}`):'标记来源或设预算'}</div></div>
+      <div class="stat-card" id="max-txn-card" style="cursor:pointer"><div class="stat-label">最大单笔 ↗</div><div class="stat-value">${fmt(maxTxn.amount)}</div><div class="stat-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(maxTxn.customName||maxTxn.name||'—').slice(0,10)}</div></div>
       <div class="stat-card"><div class="stat-label">日均支出</div><div class="stat-value">${fmt(tOut/activeDays)}</div><div class="stat-sub">${activeDays} 天有消费</div></div>`;
+    document.getElementById('max-txn-card').onclick=()=>openMaxModal(out,'全月大额支出');
   } else {
     const lifeActiveDays=new Set(out.map(t=>t.date.getDate())).size||1;
     grid.innerHTML=`
       <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value out">${fmt(lOut)}</div><div class="stat-sub">${out.length} 笔</div></div>
       <div class="stat-card"><div class="stat-label">${lIn>0?'来源收入':'备用预算'}</div><div class="stat-value in">${fmt(lifeTotal)}</div><div class="stat-sub">${lifeTotal>0?(lOut<=lifeTotal?`剩 ${fmt(lifeTotal-lOut)}`:`超 ${fmt(lOut-lifeTotal)}`):'未设定'}</div></div>
       <div class="stat-card"><div class="stat-label">日均生活费</div><div class="stat-value">${fmt(lOut/lifeActiveDays)}</div><div class="stat-sub">${lifeActiveDays} 天有消费</div></div>
-      <div class="stat-card"><div class="stat-label">生活费笔数</div><div class="stat-value">${out.length}</div><div class="stat-sub">笔支出</div></div>`;
+      <div class="stat-card" id="max-txn-card" style="cursor:pointer"><div class="stat-label">最大单笔 ↗</div><div class="stat-value">${fmt(maxTxn.amount)}</div><div class="stat-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(maxTxn.customName||maxTxn.name||'—').slice(0,10)}</div></div>`;
+    document.getElementById('max-txn-card').onclick=()=>openMaxModal(out,'生活费大额支出');
+  }
   }
 
   // budget bar
@@ -570,29 +603,77 @@ function getFilteredTxns(vT){
   return vT;
 }
 
-function renderTxns(vT){
-  const f=getFilteredTxns(vT);
-  const sorted=[...f].sort((a,b)=>b.date-a.date);
-  document.getElementById('txn-list').innerHTML=sorted.map(t=>`<div class="txn-row${selected.has(t.key)?' selected':''}" data-key="${t.key}">${txnHTML(t,true,multiMode)}</div>`).join('')
-    ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">暂无记录</p>';
+function sortTxns(arr,by,dir){
+  return [...arr].sort((a,b)=>{
+    const v=by==='amount'?(a.amount-b.amount):(a.date-b.date);
+    return dir==='asc'?v:-v;
+  });
 }
 
+function updateSortBtns(){
+  document.querySelectorAll('#sort-row .sort-btn').forEach(b=>{
+    const active=b.dataset.sort===sortBy;
+    b.classList.toggle('active',active);
+    const icon=b.querySelector('i');
+    if(active) icon.className=sortDir==='desc'?'ti ti-sort-descending':'ti ti-sort-ascending';
+    else icon.className='ti ti-arrows-sort';
+  });
+}
+
+function renderTxns(vT){
+  const f=getFilteredTxns(vT);
+  const sorted=sortTxns(f,sortBy,sortDir);
+  document.getElementById('txn-list').innerHTML=sorted.map(t=>`<div class="txn-row${selected.has(t.key)?' selected':''}" data-key="${t.key}">${txnHTML(t,true,multiMode)}</div>`).join('')
+    ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">暂无记录</p>';
+  updateSortBtns();
+}
+
+// max txn modal
+function openMaxModal(txns,title){
+  const sorted=sortTxns(txns,'amount','desc');
+  document.getElementById('max-modal-title').textContent=title;
+  document.getElementById('max-modal-list').innerHTML=sorted.map(t=>`<div class="txn-row" data-key="${t.key}" style="border-bottom:0.5px solid var(--border)">${txnHTML(t,true,false)}</div>`).join('');
+  openM('max-modal');
+}
+document.getElementById('max-modal-list').addEventListener('click',e=>{const r=e.target.closest('.txn-row');if(r){closeM('max-modal');openEditModal(r.dataset.key);}});
+
 // category detail modal
+let catDetailTxns=[];
+function renderCatDetailList(){
+  const sorted=sortTxns(catDetailTxns,catSortBy,catSortDir);
+  document.getElementById('cat-detail-list').innerHTML=sorted.map(t=>`<div class="txn-row" data-key="${t.key}" style="border-bottom:0.5px solid var(--border)">${txnHTML(t,true,false)}</div>`).join('')
+    ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">暂无记录</p>';
+  document.querySelectorAll('#cat-sort-row .sort-btn').forEach(b=>{
+    const active=b.dataset.csort===catSortBy;
+    b.classList.toggle('active',active);
+    const icon=b.querySelector('i');
+    if(active) icon.className=catSortDir==='desc'?'ti ti-sort-descending':'ti ti-sort-ascending';
+    else icon.className='ti ti-arrows-sort';
+  });
+}
+
 document.getElementById('cat-list').addEventListener('click',e=>{
   const row=e.target.closest('.cat-row');if(!row)return;
   const catKey=row.dataset.cat;
   const mT=getMonthTxns(),vT=getViewTxns(mT);
-  const txns=vT.filter(t=>t.isOut&&t.cat===catKey).sort((a,b)=>b.date-a.date);
-  const total=txns.reduce((s,t)=>s+t.amount,0);
-  const lifeAmt=txns.filter(t=>t.isLife).reduce((s,t)=>s+t.amount,0);
+  catDetailTxns=vT.filter(t=>t.isOut&&t.cat===catKey);
+  const total=catDetailTxns.reduce((s,t)=>s+t.amount,0);
+  const lifeAmt=catDetailTxns.filter(t=>t.isLife).reduce((s,t)=>s+t.amount,0);
   const c=catByKey(catKey);
   document.getElementById('cat-detail-title').textContent=`${c.key} 明细`;
   document.getElementById('cat-detail-total').textContent=fmtF(total);
-  document.getElementById('cat-detail-count').textContent=txns.length+' 笔';
+  document.getElementById('cat-detail-count').textContent=catDetailTxns.length+' 笔';
   document.getElementById('cat-detail-life').textContent=fmtF(lifeAmt);
-  document.getElementById('cat-detail-list').innerHTML=txns.map(t=>`<div class="txn-row" data-key="${t.key}" style="border-bottom:0.5px solid var(--border)">${txnHTML(t,true,false)}</div>`).join('')
-    ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">暂无记录</p>';
+  catSortBy='amount';catSortDir='desc';
+  renderCatDetailList();
   openM('cat-detail-modal');
+});
+document.getElementById('cat-sort-row').addEventListener('click',e=>{
+  const b=e.target.closest('.sort-btn');if(!b)return;
+  const s=b.dataset.csort;
+  if(catSortBy===s) catSortDir=catSortDir==='desc'?'asc':'desc';
+  else{catSortBy=s;catSortDir=s==='amount'?'desc':'desc';}
+  renderCatDetailList();
 });
 document.getElementById('cat-detail-list').addEventListener('click',e=>{const r=e.target.closest('.txn-row');if(r){closeM('cat-detail-modal');openEditModal(r.dataset.key);}});
 
@@ -694,6 +775,15 @@ document.getElementById('tabs').addEventListener('click',e=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   t.classList.add('active');
   render();
+});
+
+// sort
+document.getElementById('sort-row').addEventListener('click',e=>{
+  const b=e.target.closest('.sort-btn');if(!b)return;
+  const s=b.dataset.sort;
+  if(sortBy===s) sortDir=sortDir==='desc'?'asc':'desc';
+  else{sortBy=s;sortDir=s==='amount'?'desc':'desc';}
+  renderTxns(getViewTxns(getMonthTxns()));
 });
 
 // filter
