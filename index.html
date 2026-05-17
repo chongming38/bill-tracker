@@ -283,7 +283,7 @@ const catByKey=k=>CATS.find(c=>c.key===k)||CATS[CATS.length-1];
 let allTxns=[],months=[],mi=0,filter='all',dchart=null,editKey=null,settings={budget:0};
 
 function load(){
-  try{allTxns=JSON.parse(localStorage.getItem('txns')||'[]').map(t=>({...t,date:new Date(t.date)}));}catch(e){allTxns=[];}
+  try{allTxns=JSON.parse(localStorage.getItem('txns')||'[]').map(t=>({...t,date:new Date(t.date),isLife:t.isLife!==false}));}catch(e){allTxns=[];}
   try{settings=Object.assign({budget:0},JSON.parse(localStorage.getItem('settings')||'{}'));}catch(e){settings={budget:0};}
 }
 const save=()=>localStorage.setItem('txns',JSON.stringify(allTxns));
