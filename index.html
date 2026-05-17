@@ -63,7 +63,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
 .cat-bar-bg { flex: 1; height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
 .cat-bar { height: 100%; border-radius: 3px; transition: width 0.5s; }
 .cat-amt { font-size: 13px; color: var(--text2); width: 60px; text-align: right; flex-shrink: 0; }
-.txn-card { background: var(--bg); border-radius: var(--radius); padding: 0 1rem; margin-top: 10px; margin-bottom: 1rem; }
+.txn-card { background: var(--bg); border-radius: var(--radius); padding: 0 1rem; margin-top: 10px; margin-bottom: 5rem; }
 .filter-row { display: flex; gap: 6px; padding: 0.875rem 0 0.75rem; border-bottom: 0.5px solid var(--border); overflow-x: auto; }
 .filter-btn { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 0.5px solid var(--border2); background: transparent; cursor: pointer; color: var(--text2); white-space: nowrap; flex-shrink: 0; }
 .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
@@ -128,6 +128,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
 .day-sum-item { flex: 1; }
 .day-sum-label { font-size: 11px; color: var(--text2); margin-bottom: 3px; }
 .day-sum-val { font-size: 16px; font-weight: 500; }
+.date-search-row { display: flex; align-items: center; gap: 8px; padding: 0.875rem 0 0.75rem; border-bottom: 0.5px solid var(--border); }
+.date-search-row i { font-size: 16px; color: var(--text3); flex-shrink: 0; }
+.date-input { flex: 1; border: none; background: transparent; color: var(--text); font-size: 13px; outline: none; min-width: 0; }
+.date-input::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: pointer; }
+.date-go-btn { font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 0.5px solid var(--border2); background: transparent; cursor: pointer; color: var(--text2); white-space: nowrap; flex-shrink: 0; }
+.date-go-btn:active { background: var(--bg2); }
 .hidden { display: none; }
 </style>
 </head>
@@ -191,6 +197,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
     </div>
     <div class="section">
       <div class="txn-card">
+        <div class="date-search-row">
+          <i class="ti ti-calendar" aria-hidden="true"></i>
+          <input type="date" id="date-input" class="date-input" placeholder="输入日期查看当天">
+          <button id="date-go-btn" class="date-go-btn">查看</button>
+        </div>
         <div class="filter-row">
           <button class="filter-btn active" data-f="all">全部</button>
           <button class="filter-btn" data-f="out">支出</button>
@@ -303,6 +314,17 @@ function parseXLSX(ab){
   const ci=f=>headers.findIndex(h=>h.includes(f));
   const cT=ci('时间'),cN=ci('交易对方'),cTy=ci('收/支')||ci('收支'),cA=ci('金额'),cR=ci('备注')||ci('商品'),cS=ci('状态'),cNo=ci('单号');
   const seen=new Set(),txns=[];
+  // parse Excel serial date (days since 1900-01-00) or string date
+  function parseExcelDate(raw){
+    const n=parseFloat(raw);
+    if(!isNaN(n)&&n>40000){
+      // Excel serial: days since 1899-12-30
+      const ms=(n-25569)*86400*1000;
+      return new Date(ms);
+    }
+    const d=new Date(String(raw).replace(/\//g,'-'));
+    return isNaN(d.getTime())?null:d;
+  }
   for(let i=hi+1;i<rows.length;i++){
     const p=rows[i].map(c=>String(c||'').trim());
     if(p.length<4)continue;
@@ -311,8 +333,8 @@ function parseXLSX(ab){
     const st=cS>=0?p[cS]:'';
     if(st.includes('退款')||st.includes('已退'))continue;
     const ts=cT>=0?p[cT]:'';
-    const date=new Date(ts.replace(/\//g,'-'));
-    if(isNaN(date.getTime()))continue;
+    const date=parseExcelDate(ts);
+    if(!date)continue;
     const no=cNo>=0?p[cNo]:'';
     const rawN=(cN>=0?p[cN]:'')||(cR>=0?p[cR]:'')||'未知';
     const key=no||`${ts}_${amt}_${rawN}`;
@@ -547,8 +569,19 @@ document.getElementById('file-json').onchange=e=>{
 };
 document.getElementById('do-clear').onclick=()=>{if(confirm('确认清空所有数据？')){allTxns=[];save();buildMonths();render();closeM('menu-modal');}};
 
-document.getElementById('prev-month').onclick=()=>{if(mi<months.length-1){mi++;render();}};
-document.getElementById('next-month').onclick=()=>{if(mi>0){mi--;render();}};
+document.getElementById('date-go-btn').onclick=()=>{
+  const v=document.getElementById('date-input').value;
+  if(!v)return;
+  const date=new Date(v);
+  if(isNaN(date.getTime()))return;
+  // switch to correct month if needed
+  const targetMk=mk(date);
+  const idx=months.indexOf(targetMk);
+  if(idx===-1){alert('该日期没有账单记录');return;}
+  if(idx!==mi){mi=idx;render();}
+  openDayModal(date);
+};
+document.getElementById('date-input').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('date-go-btn').click();});
 
 const dz=document.getElementById('drop-zone');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.background='var(--bg2)';});
