@@ -9,132 +9,163 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #fff; --bg2: #f5f5f3; --bg3: #eeede9;
-  --text: #1a1a1a; --text2: #666; --text3: #999;
-  --border: rgba(0,0,0,0.09); --border2: rgba(0,0,0,0.16);
-  --radius: 12px; --radius-sm: 8px;
-  --out: #b85a30; --in: #3b6d11; --accent: #3266ad;
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#fff;--bg2:#f5f5f3;--bg3:#eeede9;
+  --text:#1a1a1a;--text2:#666;--text3:#999;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --radius:12px;--radius-sm:8px;
+  --out:#b85a30;--in:#3b6d11;--accent:#3266ad;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1a1a1a; --bg2: #242424; --bg3: #2a2a2a;
-    --text: #f0f0f0; --text2: #aaa; --text3: #555;
-    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.16);
-    --out: #e07a50; --in: #6aaa30;
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1a1a;--bg2:#242424;--bg3:#2a2a2a;
+    --text:#f0f0f0;--text2:#aaa;--text3:#555;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.16);
+    --out:#e07a50;--in:#6aaa30;
   }
 }
-body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
-.app { max-width: 480px; margin: 0 auto; background: var(--bg3); min-height: 100vh; }
-.header { background: var(--bg); padding: 1rem 1.25rem 0.75rem; border-bottom: 0.5px solid var(--border); position: sticky; top: 0; z-index: 20; }
-.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
-.header-title { font-size: 17px; font-weight: 500; }
-.header-btns { display: flex; gap: 8px; }
-.icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid var(--border2); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text2); font-size: 18px; transition: background 0.15s; }
-.icon-btn:hover { background: var(--bg2); }
-.month-nav { display: flex; align-items: center; justify-content: space-between; }
-.month-nav button { background: none; border: none; cursor: pointer; color: var(--text2); font-size: 22px; padding: 4px 8px; border-radius: 6px; }
-.month-label { font-size: 15px; font-weight: 500; }
-.budget-bar-wrap { margin: 0.75rem 0 0; }
-.budget-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); margin-bottom: 5px; }
-.budget-track { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
-.budget-fill { height: 100%; border-radius: 3px; transition: width 0.4s; background: var(--accent); }
-.budget-fill.over { background: var(--out); }
-.section { margin: 1rem 1rem 0; }
-.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-.stat-card { background: var(--bg); border-radius: var(--radius); padding: 1rem; }
-.stat-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
-.stat-value { font-size: 20px; font-weight: 500; }
-.stat-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
-.stat-value.out { color: var(--out); }
-.stat-value.in { color: var(--in); }
-.stat-value.ok { color: var(--in); }
-.stat-value.over { color: var(--out); }
-.chart-card { background: var(--bg); border-radius: var(--radius); padding: 1rem; margin-top: 10px; }
-.card-title { font-size: 13px; color: var(--text2); margin-bottom: 10px; display: flex; justify-content: space-between; }
-.card-hint { font-size: 11px; color: var(--text3); }
-.chart-wrap { position: relative; width: 100%; height: 160px; }
-.cat-card { background: var(--bg); border-radius: var(--radius); padding: 1rem; margin-top: 10px; }
-.cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.cat-row:last-child { margin-bottom: 0; }
-.cat-ico { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-.cat-name { font-size: 13px; width: 52px; flex-shrink: 0; }
-.cat-bar-bg { flex: 1; height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
-.cat-bar { height: 100%; border-radius: 3px; transition: width 0.5s; }
-.cat-amt { font-size: 13px; color: var(--text2); width: 60px; text-align: right; flex-shrink: 0; }
-.txn-card { background: var(--bg); border-radius: var(--radius); padding: 0 1rem; margin-top: 10px; margin-bottom: 5rem; }
-.filter-row { display: flex; gap: 6px; padding: 0.875rem 0 0.75rem; border-bottom: 0.5px solid var(--border); overflow-x: auto; }
-.filter-btn { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 0.5px solid var(--border2); background: transparent; cursor: pointer; color: var(--text2); white-space: nowrap; flex-shrink: 0; }
-.filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
-.txn-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); cursor: pointer; }
-.txn-row:last-child { border-bottom: none; }
-.txn-ico { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
-.txn-info { flex: 1; min-width: 0; }
-.txn-name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.txn-meta { font-size: 11px; color: var(--text3); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
-.tag { font-size: 10px; padding: 1px 6px; border-radius: 10px; }
-.tag-life { background: #e6f1fb; color: #185fa5; }
-.tag-nonlife { background: var(--bg3); color: var(--text3); }
-@media (prefers-color-scheme: dark) {
-  .tag-life { background: #0c447c44; color: #85b7eb; }
-}
-.txn-amt { font-size: 14px; font-weight: 500; flex-shrink: 0; }
-.txn-amt.out { color: var(--out); }
-.txn-amt.in { color: var(--in); }
-.upload-wrap { padding: 3rem 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-.upload-box { width: 100%; background: var(--bg); border-radius: var(--radius); border: 1.5px dashed var(--border2); padding: 2.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; }
-.upload-box:hover { background: var(--bg2); }
-.upload-box i { font-size: 36px; color: var(--text3); }
-.upload-box p { font-size: 15px; color: var(--text2); }
-.upload-box small { font-size: 12px; color: var(--text3); text-align: center; line-height: 1.6; }
-.upload-hint { font-size: 13px; color: var(--text3); text-align: center; line-height: 1.7; }
-.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
-.modal { background: var(--bg); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; padding: 1.25rem 1.5rem 2rem; max-height: 85vh; overflow-y: auto; }
-.modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 1rem; }
-.modal-close-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-.modal-close-row h3 { font-size: 16px; font-weight: 500; }
-.close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text2); }
-.menu-btn { width: 100%; padding: 13px 0; border: none; background: transparent; font-size: 14px; cursor: pointer; color: var(--text); text-align: left; display: flex; align-items: center; gap: 10px; border-bottom: 0.5px solid var(--border); }
-.menu-btn:last-child { border-bottom: none; }
-.menu-btn i { font-size: 18px; color: var(--text2); }
-.menu-btn.danger { color: #c0392b; }
-.menu-btn.danger i { color: #c0392b; }
-.field-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; margin-top: 1rem; }
-.field-label:first-of-type { margin-top: 0; }
-.field-input { width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 0.5px solid var(--border2); background: var(--bg2); color: var(--text); font-size: 14px; outline: none; }
-.field-input:focus { border-color: var(--accent); }
-.cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.cat-option { padding: 8px 4px; border-radius: var(--radius-sm); border: 0.5px solid var(--border2); background: transparent; cursor: pointer; font-size: 11px; color: var(--text2); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.cat-option i { font-size: 18px; }
-.cat-option.selected { border-color: var(--accent); background: #e6f1fb; color: var(--accent); }
-@media (prefers-color-scheme: dark) { .cat-option.selected { background: #0c447c44; } }
-.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 0.5px solid var(--border); }
-.toggle-row:last-of-type { border-bottom: none; }
-.toggle-label { font-size: 14px; }
-.toggle-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
-.toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-slider { position: absolute; inset: 0; background: var(--bg3); border-radius: 13px; cursor: pointer; transition: background 0.2s; }
-.toggle-slider:before { content:''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-.toggle input:checked + .toggle-slider { background: var(--accent); }
-.toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
-.save-btn { width: 100%; padding: 13px; border-radius: var(--radius); border: none; background: var(--accent); color: white; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 1.25rem; }
-.budget-input-wrap { display: flex; align-items: center; gap: 8px; }
-.budget-input-wrap span { font-size: 18px; color: var(--text2); }
-.budget-field { flex: 1; padding: 10px 12px; border-radius: var(--radius-sm); border: 0.5px solid var(--border2); background: var(--bg2); color: var(--text); font-size: 16px; outline: none; }
-.budget-field:focus { border-color: var(--accent); }
-.day-summary { display: flex; gap: 12px; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 0.5px solid var(--border); }
-.day-sum-item { flex: 1; }
-.day-sum-label { font-size: 11px; color: var(--text2); margin-bottom: 3px; }
-.day-sum-val { font-size: 16px; font-weight: 500; }
-.date-search-row { display: flex; align-items: center; gap: 8px; padding: 0.875rem 0 0.75rem; border-bottom: 0.5px solid var(--border); }
-.date-search-row i { font-size: 16px; color: var(--text3); flex-shrink: 0; }
-.date-input { flex: 1; border: none; background: transparent; color: var(--text); font-size: 13px; outline: none; min-width: 0; }
-.date-input::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: pointer; }
-.date-go-btn { font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 0.5px solid var(--border2); background: transparent; cursor: pointer; color: var(--text2); white-space: nowrap; flex-shrink: 0; }
-.date-go-btn:active { background: var(--bg2); }
-.hidden { display: none; }
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;}
+.app{max-width:480px;margin:0 auto;background:var(--bg3);min-height:100vh;}
+
+/* header */
+.header{background:var(--bg);padding:1rem 1.25rem 0;border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:20;}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
+.header-title{font-size:17px;font-weight:500;}
+.header-btns{display:flex;gap:8px;}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:18px;transition:background 0.15s;}
+.icon-btn:hover{background:var(--bg2);}
+.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
+.month-nav button{background:none;border:none;cursor:pointer;color:var(--text2);font-size:22px;padding:4px 8px;border-radius:6px;}
+.month-label{font-size:15px;font-weight:500;}
+
+/* tabs */
+.tabs{display:flex;border-top:0.5px solid var(--border);}
+.tab{flex:1;padding:10px 0;font-size:13px;font-weight:500;color:var(--text3);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.15s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* budget bar */
+.budget-bar-wrap{padding:0.5rem 1.25rem 0.75rem;background:var(--bg);border-bottom:0.5px solid var(--border);}
+.budget-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px;}
+.budget-track{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.budget-fill{height:100%;border-radius:3px;transition:width 0.4s;background:var(--accent);}
+.budget-fill.over{background:var(--out);}
+
+/* sections */
+.section{margin:1rem 1rem 0;}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.stat-card{background:var(--bg);border-radius:var(--radius);padding:1rem;}
+.stat-label{font-size:12px;color:var(--text2);margin-bottom:4px;}
+.stat-value{font-size:20px;font-weight:500;}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.stat-value.out{color:var(--out);}
+.stat-value.in{color:var(--in);}
+.stat-value.ok{color:var(--in);}
+.stat-value.over{color:var(--out);}
+
+/* chart */
+.chart-card{background:var(--bg);border-radius:var(--radius);padding:1rem;margin-top:10px;}
+.card-title{font-size:13px;color:var(--text2);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.card-hint{font-size:11px;color:var(--text3);}
+.chart-wrap{position:relative;width:100%;height:160px;}
+
+/* category list */
+.cat-card{background:var(--bg);border-radius:var(--radius);padding:1rem;margin-top:10px;}
+.cat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer;border-radius:var(--radius-sm);transition:background 0.1s;}
+.cat-row:last-child{margin-bottom:0;}
+.cat-row:active{background:var(--bg2);}
+.cat-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.cat-name{font-size:13px;width:52px;flex-shrink:0;}
+.cat-bar-bg{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.cat-bar{height:100%;border-radius:3px;transition:width 0.5s;}
+.cat-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.cat-amt{font-size:13px;color:var(--text2);width:60px;text-align:right;}
+.cat-arrow{font-size:14px;color:var(--text3);}
+
+/* txn list */
+.txn-card{background:var(--bg);border-radius:var(--radius);padding:0 1rem;margin-top:10px;margin-bottom:5rem;}
+.date-search-row{display:flex;align-items:center;gap:8px;padding:0.875rem 0 0.75rem;border-bottom:0.5px solid var(--border);}
+.date-search-row i{font-size:16px;color:var(--text3);flex-shrink:0;}
+.date-input{flex:1;border:none;background:transparent;color:var(--text);font-size:13px;outline:none;min-width:0;}
+.date-input::-webkit-calendar-picker-indicator{opacity:0.4;cursor:pointer;}
+.date-go-btn{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);white-space:nowrap;flex-shrink:0;}
+.filter-row{display:flex;gap:6px;padding:0.75rem 0;border-bottom:0.5px solid var(--border);overflow-x:auto;}
+.filter-btn{font-size:12px;padding:4px 12px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);white-space:nowrap;flex-shrink:0;}
+.filter-btn.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+.txn-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;position:relative;}
+.txn-row:last-child{border-bottom:none;}
+.txn-row.selected{background:rgba(50,102,173,0.07);margin:0 -1rem;padding:10px 1rem;}
+.txn-ico{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.txn-info{flex:1;min-width:0;}
+.txn-name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.txn-meta{font-size:11px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:6px;}
+.tag{font-size:10px;padding:1px 6px;border-radius:10px;}
+.tag-life{background:#e6f1fb;color:#185fa5;}
+.tag-nonlife{background:var(--bg3);color:var(--text3);}
+@media(prefers-color-scheme:dark){.tag-life{background:#0c447c44;color:#85b7eb;}}
+.txn-amt{font-size:14px;font-weight:500;flex-shrink:0;}
+.txn-amt.out{color:var(--out);}
+.txn-amt.in{color:var(--in);}
+.txn-chk{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;}
+.txn-chk.checked{background:var(--accent);border-color:var(--accent);}
+
+/* multiselect bar */
+.multibar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg);border-top:0.5px solid var(--border);padding:0.875rem 1.25rem;display:flex;align-items:center;gap:10px;z-index:30;}
+.multibar-count{font-size:13px;font-weight:500;flex:1;}
+.multibar-btn{font-size:12px;padding:7px 14px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text);white-space:nowrap;}
+.multibar-btn.primary{background:var(--accent);color:white;border-color:var(--accent);}
+.multibar-btn.cancel{color:var(--text3);}
+
+/* upload */
+.upload-wrap{padding:3rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1rem;}
+.upload-box{width:100%;background:var(--bg);border-radius:var(--radius);border:1.5px dashed var(--border2);padding:2.5rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;}
+.upload-box:hover{background:var(--bg2);}
+.upload-box i{font-size:36px;color:var(--text3);}
+.upload-box p{font-size:15px;color:var(--text2);}
+.upload-box small{font-size:12px;color:var(--text3);text-align:center;line-height:1.6;}
+.upload-hint{font-size:13px;color:var(--text3);text-align:center;line-height:1.7;}
+
+/* modals */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
+.modal{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:1.25rem 1.5rem 2rem;max-height:85vh;overflow-y:auto;}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 1rem;}
+.modal-close-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.modal-close-row h3{font-size:16px;font-weight:500;}
+.close-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2);}
+.menu-btn{width:100%;padding:13px 0;border:none;background:transparent;font-size:14px;cursor:pointer;color:var(--text);text-align:left;display:flex;align-items:center;gap:10px;border-bottom:0.5px solid var(--border);}
+.menu-btn:last-child{border-bottom:none;}
+.menu-btn i{font-size:18px;color:var(--text2);}
+.menu-btn.danger{color:#c0392b;}
+.menu-btn.danger i{color:#c0392b;}
+.field-label{font-size:12px;color:var(--text2);margin-bottom:6px;margin-top:1rem;}
+.field-label:first-of-type{margin-top:0;}
+.field-input{width:100%;padding:10px 12px;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:14px;outline:none;}
+.field-input:focus{border-color:var(--accent);}
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.cat-option{padding:8px 4px;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:transparent;cursor:pointer;font-size:11px;color:var(--text2);text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.cat-option i{font-size:18px;}
+.cat-option.selected{border-color:var(--accent);background:#e6f1fb;color:var(--accent);}
+@media(prefers-color-scheme:dark){.cat-option.selected{background:#0c447c44;}}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border);}
+.toggle-row:last-of-type{border-bottom:none;}
+.toggle-label{font-size:14px;}
+.toggle-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+.toggle{position:relative;width:44px;height:26px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--bg3);border-radius:13px;cursor:pointer;transition:background 0.2s;}
+.toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:white;border-radius:50%;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+.toggle input:checked+.toggle-slider{background:var(--accent);}
+.toggle input:checked+.toggle-slider:before{transform:translateX(18px);}
+.save-btn{width:100%;padding:13px;border-radius:var(--radius);border:none;background:var(--accent);color:white;font-size:15px;font-weight:500;cursor:pointer;margin-top:1.25rem;}
+.budget-input-wrap{display:flex;align-items:center;gap:8px;}
+.budget-input-wrap span{font-size:18px;color:var(--text2);}
+.budget-field{flex:1;padding:10px 12px;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:16px;outline:none;}
+.budget-field:focus{border-color:var(--accent);}
+.day-summary{display:flex;gap:12px;margin-bottom:1rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border);}
+.day-sum-item{flex:1;}
+.day-sum-label{font-size:11px;color:var(--text2);margin-bottom:3px;}
+.day-sum-val{font-size:16px;font-weight:500;}
+.hidden{display:none;}
 </style>
 </head>
 <body>
@@ -152,17 +183,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
       <span class="month-label" id="month-label"></span>
       <button id="next-month">›</button>
     </div>
-    <div id="budget-bar-section" class="hidden">
-      <div class="budget-bar-wrap">
-        <div class="budget-labels">
-          <span id="bl-left">生活费</span>
-          <span id="bl-right"></span>
-        </div>
-        <div class="budget-track"><div class="budget-fill" id="budget-fill" style="width:0%"></div></div>
-      </div>
+    <div class="tabs hidden" id="tabs">
+      <button class="tab active" data-tab="all">总览</button>
+      <button class="tab" data-tab="life">生活费</button>
+    </div>
+  </div>
+  <div id="budget-bar-section" class="hidden">
+    <div class="budget-bar-wrap">
+      <div class="budget-labels"><span id="bl-left">生活费</span><span id="bl-right"></span></div>
+      <div class="budget-track"><div class="budget-fill" id="budget-fill" style="width:0%"></div></div>
     </div>
   </div>
 
+  <!-- upload -->
   <div id="upload-view">
     <div class="upload-wrap">
       <div class="upload-box" id="drop-zone">
@@ -174,44 +207,46 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
     </div>
   </div>
 
+  <!-- main -->
   <div id="main-view" class="hidden">
-    <div class="section">
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">本月总支出</div><div class="stat-value out" id="s-out">¥0</div><div class="stat-sub" id="s-out-n">0 笔</div></div>
-        <div class="stat-card"><div class="stat-label">本月总收入</div><div class="stat-value in" id="s-in">¥0</div><div class="stat-sub" id="s-in-n">0 笔</div></div>
-        <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value" id="s-life">¥0</div><div class="stat-sub" id="s-life-sub">点右上角设预算</div></div>
-        <div class="stat-card"><div class="stat-label">日均支出</div><div class="stat-value" id="s-daily">¥0</div><div class="stat-sub">平均每天</div></div>
-      </div>
+    <!-- stats -->
+    <div class="section" id="stats-section">
+      <div class="stats-grid" id="stats-grid"></div>
     </div>
+    <!-- chart -->
     <div class="section">
       <div class="chart-card">
         <div class="card-title">每日支出 <span class="card-hint">点柱子看当天明细</span></div>
         <div class="chart-wrap"><canvas id="daily-chart" role="img" aria-label="每日支出图">每日消费走势</canvas></div>
       </div>
     </div>
+    <!-- categories -->
     <div class="section">
       <div class="cat-card">
-        <div class="card-title">消费分类</div>
+        <div class="card-title">消费分类 <span class="card-hint">点击查看明细</span></div>
         <div id="cat-list"></div>
       </div>
     </div>
+    <!-- txn list -->
     <div class="section">
       <div class="txn-card">
         <div class="date-search-row">
           <i class="ti ti-calendar" aria-hidden="true"></i>
-          <input type="date" id="date-input" class="date-input" placeholder="输入日期查看当天">
+          <input type="date" id="date-input" class="date-input">
           <button id="date-go-btn" class="date-go-btn">查看</button>
         </div>
-        <div class="filter-row">
-          <button class="filter-btn active" data-f="all">全部</button>
-          <button class="filter-btn" data-f="out">支出</button>
-          <button class="filter-btn" data-f="in">收入</button>
-          <button class="filter-btn" data-f="life">生活费</button>
-          <button class="filter-btn" data-f="nonlife">非生活费</button>
-        </div>
+        <div class="filter-row" id="filter-row"></div>
         <div id="txn-list"></div>
       </div>
     </div>
+  </div>
+
+  <!-- multiselect bar -->
+  <div class="multibar hidden" id="multibar">
+    <span class="multibar-count" id="multibar-count">已选 0 条</span>
+    <button class="multibar-btn" id="multi-cat-btn">改分类</button>
+    <button class="multibar-btn primary" id="multi-life-btn">切换生活费</button>
+    <button class="multibar-btn cancel" id="multi-cancel-btn">取消</button>
   </div>
 </div>
 
@@ -219,7 +254,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
 <div class="modal-bg hidden" id="menu-modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <button class="menu-btn" id="do-budget"><i class="ti ti-target"></i> 设定生活费预算</button>
+    <button class="menu-btn" id="do-budget"><i class="ti ti-target"></i> 设定生活费备用预算</button>
     <button class="menu-btn" id="do-export"><i class="ti ti-download"></i> 导出备份</button>
     <button class="menu-btn" id="do-import-json"><i class="ti ti-upload"></i> 从备份恢复</button>
     <button class="menu-btn danger" id="do-clear"><i class="ti ti-trash"></i> 清空数据</button>
@@ -230,14 +265,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
 <div class="modal-bg hidden" id="budget-modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-close-row"><h3>设定生活费预算</h3><button class="close-btn" data-close="budget-modal">✕</button></div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.6">每月生活费预算，支出默认计入生活费，可逐笔调整。</p>
+    <div class="modal-close-row"><h3>备用生活费预算</h3><button class="close-btn" data-close="budget-modal">✕</button></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.6">当月没有标记生活费来源收入时，用此预算代替。</p>
     <div class="budget-input-wrap"><span>¥</span><input type="number" class="budget-field" id="budget-input" placeholder="例如 2000"></div>
     <button class="save-btn" id="save-budget">保存</button>
   </div>
 </div>
 
-<!-- edit -->
+<!-- edit single -->
 <div class="modal-bg hidden" id="edit-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -260,11 +295,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
   </div>
 </div>
 
+<!-- batch cat -->
+<div class="modal-bg hidden" id="batch-cat-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-close-row"><h3 id="batch-cat-title">批量改分类</h3><button class="close-btn" data-close="batch-cat-modal">✕</button></div>
+    <div class="cat-grid" id="batch-cat-grid"></div>
+    <button class="save-btn" id="save-batch-cat">应用</button>
+  </div>
+</div>
+
 <!-- day detail -->
 <div class="modal-bg hidden" id="day-modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-close-row"><h3 id="day-title">1月1日</h3><button class="close-btn" data-close="day-modal">✕</button></div>
+    <div class="modal-close-row"><h3 id="day-title">明细</h3><button class="close-btn" data-close="day-modal">✕</button></div>
     <div class="day-summary">
       <div class="day-sum-item"><div class="day-sum-label">支出</div><div class="day-sum-val out" id="day-out"></div></div>
       <div class="day-sum-item"><div class="day-sum-label">收入</div><div class="day-sum-val in" id="day-in"></div></div>
@@ -274,13 +319,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif
   </div>
 </div>
 
+<!-- category detail -->
+<div class="modal-bg hidden" id="cat-detail-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-close-row"><h3 id="cat-detail-title">分类明细</h3><button class="close-btn" data-close="cat-detail-modal">✕</button></div>
+    <div class="day-summary">
+      <div class="day-sum-item"><div class="day-sum-label">总支出</div><div class="day-sum-val out" id="cat-detail-total"></div></div>
+      <div class="day-sum-item"><div class="day-sum-label">笔数</div><div class="day-sum-val" id="cat-detail-count"></div></div>
+      <div class="day-sum-item"><div class="day-sum-label">生活费部分</div><div class="day-sum-val" id="cat-detail-life"></div></div>
+    </div>
+    <div id="cat-detail-list"></div>
+  </div>
+</div>
+
 <input type="file" id="file-bill" accept=".csv,.xlsx,.xls" class="hidden">
 <input type="file" id="file-json" accept=".json" class="hidden">
 
 <script>
 const CATS=[
   {key:'餐饮',icon:'ti-tools-kitchen-2',color:'#d85a30',kw:['餐','饭','食品','饮','茶','咖啡','奶茶','外卖','美团','饿了么','麦当劳','肯德基','星巴克','瑞幸','海底捞','火锅','烧烤','小吃','面','粥','蛋糕','面包','便利店','超市','沙县','菜']},
-  {key:'交通',icon:'ti-bus',color:'#534ab7',kw:['地铁','公交','打车','滴滴','出租','高铁','火车','机票','加油','停车','单车','哈罗','摩拜','顺风车']},
+  {key:'交通',icon:'ti-bus',color:'#534ab7',kw:['地铁','公交','打车','滴滴','出租','高铁','火车','机票','加油','停车','单车','哈罗','摩拜','顺风车','花小猪']},
   {key:'购物',icon:'ti-shopping-bag',color:'#3266ad',kw:['淘宝','天猫','京东','拼多多','商场','购物','服装','鞋','数码','电器','家居']},
   {key:'娱乐',icon:'ti-device-gamepad-2',color:'#993556',kw:['游戏','电影','KTV','酒吧','演唱会','门票','会员','爱奇艺','优酷','腾讯视频','网易云','音乐']},
   {key:'医疗',icon:'ti-building-hospital',color:'#1d9e75',kw:['医院','药店','诊所','医疗','药品','体检']},
@@ -291,7 +350,9 @@ const CATS=[
 const guessCat=name=>{for(const c of CATS.slice(0,-1))if(c.kw.some(k=>name.includes(k)))return c.key;return'其他';};
 const catByKey=k=>CATS.find(c=>c.key===k)||CATS[CATS.length-1];
 
-let allTxns=[],months=[],mi=0,filter='all',dchart=null,editKey=null,settings={budget:0};
+let allTxns=[],months=[],mi=0,currentTab='all',filter='all';
+let dchart=null,editKey=null,settings={budget:0};
+let multiMode=false,selected=new Set();
 
 function load(){
   try{allTxns=JSON.parse(localStorage.getItem('txns')||'[]').map(t=>({...t,date:new Date(t.date),isLife:t.isLife!==false}));}catch(e){allTxns=[];}
@@ -304,6 +365,13 @@ const fmtF=n=>'¥'+n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
 const mk=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 const dk=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
+function parseExcelDate(raw){
+  const n=parseFloat(raw);
+  if(!isNaN(n)&&n>40000){return new Date((n-25569)*86400*1000);}
+  const d=new Date(String(raw).replace(/\//g,'-'));
+  return isNaN(d.getTime())?null:d;
+}
+
 function parseXLSX(ab){
   const wb=XLSX.read(ab,{type:'array',cellDates:true});
   const ws=wb.Sheets[wb.SheetNames[0]];
@@ -314,17 +382,6 @@ function parseXLSX(ab){
   const ci=f=>headers.findIndex(h=>h.includes(f));
   const cT=ci('时间'),cN=ci('交易对方'),cTy=ci('收/支')||ci('收支'),cA=ci('金额'),cR=ci('备注')||ci('商品'),cS=ci('状态'),cNo=ci('单号');
   const seen=new Set(),txns=[];
-  // parse Excel serial date (days since 1900-01-00) or string date
-  function parseExcelDate(raw){
-    const n=parseFloat(raw);
-    if(!isNaN(n)&&n>40000){
-      // Excel serial: days since 1899-12-30
-      const ms=(n-25569)*86400*1000;
-      return new Date(ms);
-    }
-    const d=new Date(String(raw).replace(/\//g,'-'));
-    return isNaN(d.getTime())?null:d;
-  }
   for(let i=hi+1;i<rows.length;i++){
     const p=rows[i].map(c=>String(c||'').trim());
     if(p.length<4)continue;
@@ -332,12 +389,11 @@ function parseXLSX(ab){
     if(isNaN(amt)||amt===0)continue;
     const st=cS>=0?p[cS]:'';
     if(st.includes('退款')||st.includes('已退'))continue;
-    const ts=cT>=0?p[cT]:'';
-    const date=parseExcelDate(ts);
+    const date=parseExcelDate(cT>=0?p[cT]:'');
     if(!date)continue;
     const no=cNo>=0?p[cNo]:'';
     const rawN=(cN>=0?p[cN]:'')||(cR>=0?p[cR]:'')||'未知';
-    const key=no||`${ts}_${amt}_${rawN}`;
+    const key=no||`${p[cT]}_${amt}_${rawN}`;
     if(seen.has(key))continue;seen.add(key);
     const ty=cTy>=0?p[cTy]:'';
     const isOut=ty.includes('支出')||(!ty.includes('收入')&&amt<0);
@@ -376,14 +432,22 @@ function parseCSV(text){
 function merge(newT){const ex=new Set(allTxns.map(t=>t.key));let n=0;for(const t of newT)if(!ex.has(t.key)){allTxns.push(t);n++;}return n;}
 function buildMonths(){const s=new Set(allTxns.map(t=>mk(t.date)));months=[...s].sort().reverse();}
 
-function txnHTML(t,showDate=false){
+function getMonthTxns(){return allTxns.filter(t=>mk(t.date)===months[mi]);}
+function getViewTxns(mT){
+  // for life tab, only show life-related
+  if(currentTab==='life') return mT.filter(t=>t.isOut?t.isLife:t.isIncomeLife);
+  return mT;
+}
+
+function txnHTML(t,showDate=false,showChk=false){
   const c=catByKey(t.cat);
   const dn=t.customName||t.name;
   const ds=showDate
     ?`${t.date.getMonth()+1}/${t.date.getDate()} ${String(t.date.getHours()).padStart(2,'0')}:${String(t.date.getMinutes()).padStart(2,'0')}`
     :`${String(t.date.getHours()).padStart(2,'0')}:${String(t.date.getMinutes()).padStart(2,'0')}`;
   const tag=t.isOut?(t.isLife?'<span class="tag tag-life">生活费</span>':'<span class="tag tag-nonlife">非生活费</span>'):(t.isIncomeLife?'<span class="tag tag-life">生活费来源</span>':'');
-  return`<div class="txn-ico" style="background:${c.color}22"><i class="ti ${c.icon}" style="color:${c.color}"></i></div>
+  const chk=showChk?`<div class="txn-chk${selected.has(t.key)?' checked':''}" aria-hidden="true">${selected.has(t.key)?'✓':''}</div>`:'';
+  return`${chk}<div class="txn-ico" style="background:${c.color}22"><i class="ti ${c.icon}" style="color:${c.color}"></i></div>
 <div class="txn-info"><div class="txn-name">${dn.length>18?dn.slice(0,18)+'…':dn}</div><div class="txn-meta">${ds} · ${c.key} ${tag}</div></div>
 <div class="txn-amt ${t.isOut?'out':'in'}">${t.isOut?'-':'+'}${fmtF(t.amount)}</div>`;
 }
@@ -393,54 +457,65 @@ function render(){
     document.getElementById('main-view').classList.add('hidden');
     document.getElementById('upload-view').style.display='';
     document.getElementById('month-nav').classList.add('hidden');
+    document.getElementById('tabs').classList.add('hidden');
     document.getElementById('budget-bar-section').classList.add('hidden');
     return;
   }
   document.getElementById('upload-view').style.display='none';
   document.getElementById('main-view').classList.remove('hidden');
   document.getElementById('month-nav').classList.remove('hidden');
+  document.getElementById('tabs').classList.remove('hidden');
 
   const [y,m]=months[mi].split('-').map(Number);
   document.getElementById('month-label').textContent=`${y}年${m}月`;
-  const mT=allTxns.filter(t=>mk(t.date)===months[mi]);
-  const out=mT.filter(t=>t.isOut),inn=mT.filter(t=>!t.isOut);
+  const mT=getMonthTxns();
+  const vT=getViewTxns(mT);
+  const out=vT.filter(t=>t.isOut),inn=vT.filter(t=>!t.isOut);
   const tOut=out.reduce((s,t)=>s+t.amount,0);
   const tIn=inn.reduce((s,t)=>s+t.amount,0);
-  const lOut=out.filter(t=>t.isLife).reduce((s,t)=>s+t.amount,0);
-  const lIn=inn.filter(t=>t.isIncomeLife).reduce((s,t)=>s+t.amount,0);
   const days=new Date(y,m,0).getDate();
 
-  document.getElementById('s-out').textContent=fmt(tOut);
-  document.getElementById('s-out-n').textContent=out.length+' 笔支出';
-  document.getElementById('s-in').textContent=fmt(tIn);
-  document.getElementById('s-in-n').textContent=inn.length+' 笔收入';
-  document.getElementById('s-daily').textContent=fmt(tOut/days);
+  // life income total (always from full month)
+  const lIn=mT.filter(t=>!t.isOut&&t.isIncomeLife).reduce((s,t)=>s+t.amount,0);
+  const lOut=mT.filter(t=>t.isOut&&t.isLife).reduce((s,t)=>s+t.amount,0);
+  const lifeTotal=lIn>0?lIn:(settings.budget||0);
 
-  const lifeEl=document.getElementById('s-life');
-  lifeEl.textContent=fmt(lOut);
-  lifeEl.className='stat-value';
-  const hasLifeIncome=lIn>0;
-  const lifeTotal=hasLifeIncome?lIn:(settings.budget||0);
+  // stats
+  const grid=document.getElementById('stats-grid');
+  if(currentTab==='all'){
+    grid.innerHTML=`
+      <div class="stat-card"><div class="stat-label">本月总支出</div><div class="stat-value out">${fmt(tOut)}</div><div class="stat-sub">${out.length} 笔支出</div></div>
+      <div class="stat-card"><div class="stat-label">本月总收入</div><div class="stat-value in">${fmt(tIn)}</div><div class="stat-sub">${inn.length} 笔收入</div></div>
+      <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value ${lifeTotal>0?(lOut<=lifeTotal?'ok':'over'):''}">${fmt(lOut)}</div><div class="stat-sub">${lifeTotal>0?(lOut<=lifeTotal?`还剩 ${fmt(lifeTotal-lOut)}`:`超支 ${fmt(lOut-lifeTotal)}`):'标记来源或设预算'}</div></div>
+      <div class="stat-card"><div class="stat-label">日均支出</div><div class="stat-value">${fmt(tOut/days)}</div><div class="stat-sub">平均每天</div></div>`;
+  } else {
+    // life tab stats
+    const lDays=days;
+    grid.innerHTML=`
+      <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value out">${fmt(lOut)}</div><div class="stat-sub">${out.length} 笔</div></div>
+      <div class="stat-card"><div class="stat-label">${lIn>0?'来源收入':'备用预算'}</div><div class="stat-value in">${fmt(lifeTotal)}</div><div class="stat-sub">${lifeTotal>0?(lOut<=lifeTotal?`剩 ${fmt(lifeTotal-lOut)}`:`超 ${fmt(lOut-lifeTotal)}`):'未设定'}</div></div>
+      <div class="stat-card"><div class="stat-label">日均生活费</div><div class="stat-value">${fmt(lOut/lDays)}</div><div class="stat-sub">平均每天</div></div>
+      <div class="stat-card"><div class="stat-label">生活费笔数</div><div class="stat-value">${out.length}</div><div class="stat-sub">笔支出</div></div>`;
+  }
+
+  // budget bar
   if(lifeTotal>0){
-    const rem=lifeTotal-lOut;
-    const sourceLabel=hasLifeIncome?`来源 ${fmt(lIn)}`:`预算 ${fmt(lifeTotal)}`;
-    document.getElementById('s-life-sub').textContent=rem>=0?`还剩 ${fmt(rem)}`:`超支 ${fmt(-rem)}`;
-    lifeEl.classList.add(rem>=0?'ok':'over');
     document.getElementById('budget-bar-section').classList.remove('hidden');
     const pct=Math.min(lOut/lifeTotal*100,100);
     const fill=document.getElementById('budget-fill');
     fill.style.width=pct+'%';
     fill.className='budget-fill'+(lOut>lifeTotal?' over':'');
-    document.getElementById('bl-left').textContent=`生活费 ${fmt(lOut)} / ${fmt(lifeTotal)}（${sourceLabel}）`;
-    document.getElementById('bl-right').textContent=rem>=0?`剩 ${fmt(rem)}`:`超 ${fmt(-rem)}`;
+    const src=lIn>0?`来源 ${fmt(lIn)}`:`预算 ${fmt(lifeTotal)}`;
+    document.getElementById('bl-left').textContent=`生活费 ${fmt(lOut)} / ${fmt(lifeTotal)}（${src}）`;
+    document.getElementById('bl-right').textContent=lOut<=lifeTotal?`剩 ${fmt(lifeTotal-lOut)}`:`超 ${fmt(lOut-lifeTotal)}`;
   } else {
-    document.getElementById('s-life-sub').textContent='标记收入来源或设预算';
     document.getElementById('budget-bar-section').classList.add('hidden');
   }
 
   renderChart(out,y,m,days);
   renderCats(out);
-  renderTxns(mT);
+  renderFilterBtns();
+  renderTxns(vT);
 }
 
 function renderChart(out,y,m,days){
@@ -455,45 +530,85 @@ function renderChart(out,y,m,days){
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'¥'+c.parsed.y.toFixed(2)}}},
       scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:10},maxTicksLimit:12,autoSkip:true}},y:{grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>'¥'+v}}},
-      onClick:(e,els)=>{if(!els.length)return;openDayModal(new Date(y,m-1,els[0].index+1));}
+      onClick:(e,els)=>{if(!els.length)return;const [y2,m2]=months[mi].split('-').map(Number);openDayModal(new Date(y2,m2-1,els[0].index+1));}
     }
   });
 }
 
 function renderCats(out){
   const map={};
-  out.forEach(t=>{const c=catByKey(t.cat);if(!map[c.key])map[c.key]={...c,total:0};map[c.key].total+=t.amount;});
-  const list=Object.values(map).sort((a,b)=>b.total-a.total).slice(0,6);
+  out.forEach(t=>{const c=catByKey(t.cat);if(!map[c.key])map[c.key]={...c,total:0,count:0};map[c.key].total+=t.amount;map[c.key].count++;});
+  const list=Object.values(map).sort((a,b)=>b.total-a.total);
   const mx=list[0]?.total||1;
-  document.getElementById('cat-list').innerHTML=list.map(c=>`<div class="cat-row"><div class="cat-ico" style="background:${c.color}22"><i class="ti ${c.icon}" style="color:${c.color}"></i></div><span class="cat-name">${c.key}</span><div class="cat-bar-bg"><div class="cat-bar" style="width:${Math.round(c.total/mx*100)}%;background:${c.color}"></div></div><span class="cat-amt">${fmt(c.total)}</span></div>`).join('')||'<p style="font-size:13px;color:var(--text3)">暂无数据</p>';
+  document.getElementById('cat-list').innerHTML=list.map(c=>`
+    <div class="cat-row" data-cat="${c.key}">
+      <div class="cat-ico" style="background:${c.color}22"><i class="ti ${c.icon}" style="color:${c.color}"></i></div>
+      <span class="cat-name">${c.key}</span>
+      <div class="cat-bar-bg"><div class="cat-bar" style="width:${Math.round(c.total/mx*100)}%;background:${c.color}"></div></div>
+      <div class="cat-right"><span class="cat-amt">${fmt(c.total)}</span><i class="ti ti-chevron-right cat-arrow" aria-hidden="true"></i></div>
+    </div>`).join('')||'<p style="font-size:13px;color:var(--text3)">暂无数据</p>';
 }
 
-function renderTxns(mT){
-  let f;
-  if(filter==='out')f=mT.filter(t=>t.isOut);
-  else if(filter==='in')f=mT.filter(t=>!t.isOut);
-  else if(filter==='life')f=mT.filter(t=>t.isOut&&t.isLife);
-  else if(filter==='nonlife')f=mT.filter(t=>t.isOut&&!t.isLife);
-  else f=mT;
+function renderFilterBtns(){
+  const filters=currentTab==='all'
+    ?[{f:'all',l:'全部'},{f:'out',l:'支出'},{f:'in',l:'收入'},{f:'life',l:'生活费'},{f:'nonlife',l:'非生活费'}]
+    :[{f:'all',l:'全部'},{f:'out',l:'支出'},{f:'in',l:'生活费来源'}];
+  document.getElementById('filter-row').innerHTML=filters.map(x=>`<button class="filter-btn${filter===x.f?' active':''}" data-f="${x.f}">${x.l}</button>`).join('');
+}
+
+function getFilteredTxns(vT){
+  if(currentTab==='life'){
+    if(filter==='out') return vT.filter(t=>t.isOut);
+    if(filter==='in') return vT.filter(t=>!t.isOut);
+    return vT;
+  }
+  if(filter==='out') return vT.filter(t=>t.isOut);
+  if(filter==='in') return vT.filter(t=>!t.isOut);
+  if(filter==='life') return vT.filter(t=>t.isOut&&t.isLife);
+  if(filter==='nonlife') return vT.filter(t=>t.isOut&&!t.isLife);
+  return vT;
+}
+
+function renderTxns(vT){
+  const f=getFilteredTxns(vT);
   const sorted=[...f].sort((a,b)=>b.date-a.date);
-  document.getElementById('txn-list').innerHTML=sorted.map(t=>`<div class="txn-row" data-key="${t.key}">${txnHTML(t,true)}</div>`).join('')
+  document.getElementById('txn-list').innerHTML=sorted.map(t=>`<div class="txn-row${selected.has(t.key)?' selected':''}" data-key="${t.key}">${txnHTML(t,true,multiMode)}</div>`).join('')
     ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">暂无记录</p>';
 }
 
+// category detail modal
+document.getElementById('cat-list').addEventListener('click',e=>{
+  const row=e.target.closest('.cat-row');if(!row)return;
+  const catKey=row.dataset.cat;
+  const mT=getMonthTxns(),vT=getViewTxns(mT);
+  const txns=vT.filter(t=>t.isOut&&t.cat===catKey).sort((a,b)=>b.date-a.date);
+  const total=txns.reduce((s,t)=>s+t.amount,0);
+  const lifeAmt=txns.filter(t=>t.isLife).reduce((s,t)=>s+t.amount,0);
+  const c=catByKey(catKey);
+  document.getElementById('cat-detail-title').textContent=`${c.key} 明细`;
+  document.getElementById('cat-detail-total').textContent=fmtF(total);
+  document.getElementById('cat-detail-count').textContent=txns.length+' 笔';
+  document.getElementById('cat-detail-life').textContent=fmtF(lifeAmt);
+  document.getElementById('cat-detail-list').innerHTML=txns.map(t=>`<div class="txn-row" data-key="${t.key}" style="border-bottom:0.5px solid var(--border)">${txnHTML(t,true,false)}</div>`).join('')
+    ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">暂无记录</p>';
+  openM('cat-detail-modal');
+});
+document.getElementById('cat-detail-list').addEventListener('click',e=>{const r=e.target.closest('.txn-row');if(r){closeM('cat-detail-modal');openEditModal(r.dataset.key);}});
+
+// day modal
 function openDayModal(date){
   const d=dk(date),dayT=allTxns.filter(t=>dk(t.date)===d).sort((a,b)=>b.date-a.date);
   document.getElementById('day-title').textContent=`${date.getMonth()+1}月${date.getDate()}日`;
-  const dOut=dayT.filter(t=>t.isOut).reduce((s,t)=>s+t.amount,0);
-  const dIn=dayT.filter(t=>!t.isOut).reduce((s,t)=>s+t.amount,0);
-  const dLife=dayT.filter(t=>t.isOut&&t.isLife).reduce((s,t)=>s+t.amount,0);
-  document.getElementById('day-out').textContent=fmtF(dOut);
-  document.getElementById('day-in').textContent=fmtF(dIn);
-  document.getElementById('day-life').textContent=fmtF(dLife);
-  document.getElementById('day-list').innerHTML=dayT.map(t=>`<div class="txn-row" data-key="${t.key}" style="border-bottom:0.5px solid var(--border)">${txnHTML(t,false)}</div>`).join('')
+  document.getElementById('day-out').textContent=fmtF(dayT.filter(t=>t.isOut).reduce((s,t)=>s+t.amount,0));
+  document.getElementById('day-in').textContent=fmtF(dayT.filter(t=>!t.isOut).reduce((s,t)=>s+t.amount,0));
+  document.getElementById('day-life').textContent=fmtF(dayT.filter(t=>t.isOut&&t.isLife).reduce((s,t)=>s+t.amount,0));
+  document.getElementById('day-list').innerHTML=dayT.map(t=>`<div class="txn-row" data-key="${t.key}" style="border-bottom:0.5px solid var(--border)">${txnHTML(t,false,false)}</div>`).join('')
     ||'<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">当天无记录</p>';
   openM('day-modal');
 }
+document.getElementById('day-list').addEventListener('click',e=>{const r=e.target.closest('.txn-row');if(r){closeM('day-modal');openEditModal(r.dataset.key);}});
 
+// edit modal
 function openEditModal(key){
   const t=allTxns.find(x=>x.key===key);if(!t)return;
   editKey=key;
@@ -504,10 +619,8 @@ function openEditModal(key){
   const grid=document.getElementById('edit-cat-grid');
   grid.innerHTML=CATS.map(c=>`<button class="cat-option${t.cat===c.key?' selected':''}" data-cat="${c.key}"><i class="ti ${c.icon}" style="color:${c.color}"></i>${c.key}</button>`).join('');
   grid.querySelectorAll('.cat-option').forEach(b=>{b.onclick=()=>{grid.querySelectorAll('.cat-option').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};});
-  closeM('day-modal');
   openM('edit-modal');
 }
-
 document.getElementById('save-edit').onclick=()=>{
   const t=allTxns.find(x=>x.key===editKey);if(!t)return;
   const sel=document.querySelector('#edit-cat-grid .cat-option.selected');
@@ -518,37 +631,100 @@ document.getElementById('save-edit').onclick=()=>{
   save();render();closeM('edit-modal');
 };
 
+// txn list click — single tap edit, long press multi-select
+let pressTimer=null;
+document.getElementById('txn-list').addEventListener('pointerdown',e=>{
+  const r=e.target.closest('.txn-row');if(!r)return;
+  pressTimer=setTimeout(()=>{pressTimer=null;enterMulti(r.dataset.key);},500);
+});
+document.getElementById('txn-list').addEventListener('pointerup',()=>{if(pressTimer){clearTimeout(pressTimer);pressTimer=null;}});
+document.getElementById('txn-list').addEventListener('pointercancel',()=>{if(pressTimer){clearTimeout(pressTimer);pressTimer=null;}});
+document.getElementById('txn-list').addEventListener('click',e=>{
+  const r=e.target.closest('.txn-row');if(!r)return;
+  if(multiMode){toggleSelect(r.dataset.key);}
+  else{openEditModal(r.dataset.key);}
+});
+
+function enterMulti(key){
+  multiMode=true;selected.clear();selected.add(key);
+  document.getElementById('multibar').classList.remove('hidden');
+  updateMultiBar();
+  renderTxns(getViewTxns(getMonthTxns()));
+}
+function toggleSelect(key){
+  if(selected.has(key))selected.delete(key);else selected.add(key);
+  if(selected.size===0){exitMulti();return;}
+  updateMultiBar();
+  renderTxns(getViewTxns(getMonthTxns()));
+}
+function exitMulti(){
+  multiMode=false;selected.clear();
+  document.getElementById('multibar').classList.add('hidden');
+  renderTxns(getViewTxns(getMonthTxns()));
+}
+function updateMultiBar(){
+  document.getElementById('multibar-count').textContent=`已选 ${selected.size} 条`;
+}
+document.getElementById('multi-cancel-btn').onclick=exitMulti;
+document.getElementById('multi-life-btn').onclick=()=>{
+  const keys=[...selected];
+  const allLife=keys.every(k=>allTxns.find(t=>t.key===k)?.isLife);
+  keys.forEach(k=>{const t=allTxns.find(x=>x.key===k);if(t&&t.isOut)t.isLife=!allLife;});
+  save();exitMulti();render();
+};
+document.getElementById('multi-cat-btn').onclick=()=>{
+  document.getElementById('batch-cat-title').textContent=`批量改分类（${selected.size} 条）`;
+  const grid=document.getElementById('batch-cat-grid');
+  grid.innerHTML=CATS.map(c=>`<button class="cat-option" data-cat="${c.key}"><i class="ti ${c.icon}" style="color:${c.color}"></i>${c.key}</button>`).join('');
+  grid.querySelectorAll('.cat-option').forEach(b=>{b.onclick=()=>{grid.querySelectorAll('.cat-option').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};});
+  openM('batch-cat-modal');
+};
+document.getElementById('save-batch-cat').onclick=()=>{
+  const sel=document.querySelector('#batch-cat-grid .cat-option.selected');
+  if(!sel)return;
+  [...selected].forEach(k=>{const t=allTxns.find(x=>x.key===k);if(t)t.cat=sel.dataset.cat;});
+  save();closeM('batch-cat-modal');exitMulti();render();
+};
+
+// tabs
+document.getElementById('tabs').addEventListener('click',e=>{
+  const t=e.target.closest('.tab');if(!t)return;
+  currentTab=t.dataset.tab;filter='all';
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  render();
+});
+
+// filter
+document.getElementById('filter-row').addEventListener('click',e=>{
+  const b=e.target.closest('.filter-btn');if(!b)return;
+  filter=b.dataset.f;
+  document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  renderTxns(getViewTxns(getMonthTxns()));
+});
+
+// budget
 document.getElementById('save-budget').onclick=()=>{
   const v=parseFloat(document.getElementById('budget-input').value);
   if(!isNaN(v)&&v>=0){settings.budget=v;saveS();render();closeM('budget-modal');}
 };
 document.getElementById('do-budget').onclick=()=>{document.getElementById('budget-input').value=settings.budget||'';closeM('menu-modal');openM('budget-modal');};
 
+// modals
 const openM=id=>document.getElementById(id).classList.remove('hidden');
 const closeM=id=>document.getElementById(id).classList.add('hidden');
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeM(b.dataset.close));
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.add('hidden');}));
 
-document.getElementById('txn-list').addEventListener('click',e=>{const r=e.target.closest('.txn-row');if(r)openEditModal(r.dataset.key);});
-document.getElementById('day-list').addEventListener('click',e=>{const r=e.target.closest('.txn-row');if(r)openEditModal(r.dataset.key);});
-
-document.querySelector('.filter-row').addEventListener('click',e=>{
-  const b=e.target.closest('.filter-btn');if(!b)return;
-  filter=b.dataset.f;
-  document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  renderTxns(allTxns.filter(t=>mk(t.date)===months[mi]));
-});
-
+// import
 document.getElementById('import-btn').onclick=()=>document.getElementById('file-bill').click();
 document.getElementById('drop-zone').onclick=()=>document.getElementById('file-bill').click();
-
 function handleTxns(txns){
   if(!txns||!txns.length){alert('解析失败，请确认是微信账单文件');return;}
   const n=merge(txns);save();buildMonths();mi=0;render();
   alert(n>0?`成功导入 ${n} 条新记录`:'没有新记录');
 }
-
 document.getElementById('file-bill').onchange=e=>{
   const f=e.target.files[0];if(!f)return;
   if(f.name.match(/\.xlsx?$/i)){const r=new FileReader();r.onload=ev=>handleTxns(parseXLSX(new Uint8Array(ev.target.result)));r.readAsArrayBuffer(f);}
@@ -556,6 +732,7 @@ document.getElementById('file-bill').onchange=e=>{
   e.target.value='';
 };
 
+// menu
 document.getElementById('menu-btn').onclick=()=>openM('menu-modal');
 document.getElementById('do-export').onclick=()=>{
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(allTxns)],{type:'application/json'}));a.download='bill-backup.json';a.click();closeM('menu-modal');
@@ -564,27 +741,27 @@ document.getElementById('do-import-json').onclick=()=>{closeM('menu-modal');docu
 document.getElementById('file-json').onchange=e=>{
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=ev=>{try{const d=JSON.parse(ev.target.result).map(t=>({...t,date:new Date(t.date)}));const n=merge(d);save();buildMonths();mi=0;render();alert(`导入完成，新增 ${n} 条`);}catch(e){alert('文件格式错误');}};
+  r.onload=ev=>{try{const d=JSON.parse(ev.target.result).map(t=>({...t,date:new Date(t.date),isLife:t.isLife!==false}));const n=merge(d);save();buildMonths();mi=0;render();alert(`导入完成，新增 ${n} 条`);}catch(e){alert('文件格式错误');}};
   r.readAsText(f);e.target.value='';
 };
 document.getElementById('do-clear').onclick=()=>{if(confirm('确认清空所有数据？')){allTxns=[];save();buildMonths();render();closeM('menu-modal');}};
 
+// month nav
+document.getElementById('prev-month').onclick=()=>{if(mi<months.length-1){mi++;render();}};
+document.getElementById('next-month').onclick=()=>{if(mi>0){mi--;render();}};
+
+// date search
 document.getElementById('date-go-btn').onclick=()=>{
-  const v=document.getElementById('date-input').value;
-  if(!v)return;
-  const date=new Date(v+'T00:00:00');
-  if(isNaN(date.getTime()))return;
-  const targetMk=mk(date);
-  const idx=months.indexOf(targetMk);
+  const v=document.getElementById('date-input').value;if(!v)return;
+  const date=new Date(v+'T00:00:00');if(isNaN(date.getTime()))return;
+  const idx=months.indexOf(mk(date));
   if(idx===-1){alert('该日期没有账单记录');return;}
   if(idx!==mi){mi=idx;render();}
   openDayModal(date);
 };
 document.getElementById('date-input').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('date-go-btn').click();});
 
-document.getElementById('prev-month').onclick=()=>{if(mi<months.length-1){mi++;render();}};
-document.getElementById('next-month').onclick=()=>{if(mi>0){mi--;render();}};
-
+// drag drop
 const dz=document.getElementById('drop-zone');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.background='var(--bg2)';});
 dz.addEventListener('dragleave',()=>dz.style.background='');
