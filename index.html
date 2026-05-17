@@ -8,6 +8,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -122,7 +123,7 @@
       <div class="upload-box" id="drop-zone">
         <i class="ti ti-file-text"></i>
         <p>导入微信账单</p>
-        <small>支持 CSV 格式<br>微信支付 → 账单 → 右上角下载</small>
+        <small>支持 Excel (.xlsx) 和 CSV 格式<br>微信支付 → 账单 → 下载记录 → 用于个人对账</small>
       </div>
       <p class="upload-hint">数据仅保存在本设备浏览器中<br>不会上传到任何服务器</p>
     </div>
@@ -194,7 +195,7 @@
   </div>
 </div>
 
-<input type="file" id="file-csv" accept=".csv" class="hidden">
+<input type="file" id="file-csv" accept=".csv,.xlsx,.xls" class="hidden">
 <input type="file" id="file-json" accept=".json" class="hidden">
 
 <script>
@@ -350,19 +351,71 @@ function renderTxns(mTxns) {
 document.getElementById('drop-zone').onclick = ()=>document.getElementById('file-csv').click();
 document.getElementById('import-btn').onclick = ()=>document.getElementById('file-csv').click();
 
+function handleImportedTxns(txns) {
+  if (!txns||!txns.length) { alert('解析失败，请确认是微信账单文件（Excel或CSV）'); return; }
+  const added = merge(txns);
+  save(); buildMonths(); mi=0; render();
+  if (added>0) alert(`成功导入 ${added} 条新记录`);
+  else alert('没有新记录，可能已全部导入过了');
+}
+
+function parseXLSX(ab) {
+  const wb = XLSX.read(ab, {type:'array', cellDates:true});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:false, dateNF:'yyyy-mm-dd hh:mm:ss'});
+  // find header row
+  let hi = -1, headers = [];
+  for (let i=0;i<rows.length;i++) {
+    const r = rows[i].map(c=>String(c||'').trim());
+    if ((r.some(c=>c.includes('交易时间')||c.includes('时间'))) && r.some(c=>c.includes('金额'))) {
+      hi=i; headers=r; break;
+    }
+  }
+  if (hi===-1) return null;
+  const ci = f => headers.findIndex(h=>h.includes(f));
+  const cTime=ci('时间'), cName=ci('交易对方'), cType=ci('收/支')||ci('收支'), cAmt=ci('金额'), cRmk=ci('备注')||ci('商品'), cSt=ci('状态'), cNo=ci('单号');
+  const seen = new Set();
+  const txns = [];
+  for (let i=hi+1;i<rows.length;i++) {
+    const p = rows[i].map(c=>String(c||'').trim());
+    if (p.length<4) continue;
+    const amt = parseFloat((p[cAmt]||'').replace(/[¥, ]/g,''));
+    if (isNaN(amt)||amt===0) continue;
+    const st = cSt>=0?p[cSt]:'';
+    if (st.includes('退款')||st.includes('已退')) continue;
+    const timeStr = cTime>=0?p[cTime]:'';
+    const date = new Date(timeStr.replace(/\//g,'-'));
+    if (isNaN(date.getTime())) continue;
+    const no = cNo>=0?p[cNo]:'';
+    const key = no || `${timeStr}_${amt}_${cName>=0?p[cName]:''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const typeStr = cType>=0?p[cType]:'';
+    const isOut = typeStr.includes('支出')||(!typeStr.includes('收入')&&amt<0);
+    const name = (cName>=0?p[cName]:'')||(cRmk>=0?p[cRmk]:'')||'未知';
+    txns.push({ date, name, remark:cRmk>=0?p[cRmk]:'', amount:Math.abs(amt), isOut, no, key });
+  }
+  return txns;
+}
+
 document.getElementById('file-csv').onchange = e=>{
   const f = e.target.files[0]; if(!f) return;
-  const reader = new FileReader();
-  reader.onload = ev=>{
-    let text = ev.target.result;
-    const txns = parseCSV(text);
-    if (!txns||!txns.length) { alert('解析失败，请确认是微信账单CSV文件'); return; }
-    const added = merge(txns);
-    save(); buildMonths(); mi=0; render();
-    if (added>0) alert(`成功导入 ${added} 条新记录`);
-    else alert('没有新记录，可能已全部导入过了');
-  };
-  reader.readAsText(f,'utf-8');
+  const isXlsx = f.name.match(/\.xlsx?$/i);
+  if (isXlsx) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const txns = parseXLSX(new Uint8Array(ev.target.result));
+      handleImportedTxns(txns);
+    };
+    reader.readAsArrayBuffer(f);
+  } else {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const txns = parseCSV(ev.target.result);
+      handleImportedTxns(txns);
+    };
+    reader.readAsText(f,'utf-8');
+  }
   e.target.value='';
 };
 
@@ -412,3 +465,4 @@ load(); buildMonths(); render();
 </script>
 </body>
 </html>
+
