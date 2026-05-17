@@ -397,19 +397,22 @@ function render(){
   const lifeEl=document.getElementById('s-life');
   lifeEl.textContent=fmt(lOut);
   lifeEl.className='stat-value';
-  if(settings.budget>0){
-    const total=settings.budget+lIn,rem=total-lOut;
+  const hasLifeIncome=lIn>0;
+  const lifeTotal=hasLifeIncome?lIn:(settings.budget||0);
+  if(lifeTotal>0){
+    const rem=lifeTotal-lOut;
+    const sourceLabel=hasLifeIncome?`来源 ${fmt(lIn)}`:`预算 ${fmt(lifeTotal)}`;
     document.getElementById('s-life-sub').textContent=rem>=0?`还剩 ${fmt(rem)}`:`超支 ${fmt(-rem)}`;
     lifeEl.classList.add(rem>=0?'ok':'over');
     document.getElementById('budget-bar-section').classList.remove('hidden');
-    const pct=Math.min(lOut/total*100,100);
+    const pct=Math.min(lOut/lifeTotal*100,100);
     const fill=document.getElementById('budget-fill');
     fill.style.width=pct+'%';
-    fill.className='budget-fill'+(lOut>total?' over':'');
-    document.getElementById('bl-left').textContent=`生活费 ${fmt(lOut)} / ${fmt(total)}`;
+    fill.className='budget-fill'+(lOut>lifeTotal?' over':'');
+    document.getElementById('bl-left').textContent=`生活费 ${fmt(lOut)} / ${fmt(lifeTotal)}（${sourceLabel}）`;
     document.getElementById('bl-right').textContent=rem>=0?`剩 ${fmt(rem)}`:`超 ${fmt(-rem)}`;
   } else {
-    document.getElementById('s-life-sub').textContent='点右上角设预算';
+    document.getElementById('s-life-sub').textContent='标记收入来源或设预算';
     document.getElementById('budget-bar-section').classList.add('hidden');
   }
 
