@@ -474,6 +474,8 @@ function render(){
   const tOut=out.reduce((s,t)=>s+t.amount,0);
   const tIn=inn.reduce((s,t)=>s+t.amount,0);
   const days=new Date(y,m,0).getDate();
+  // days with actual spending
+  const activeDays=new Set(out.map(t=>t.date.getDate())).size||1;
 
   // life income total (always from full month)
   const lIn=mT.filter(t=>!t.isOut&&t.isIncomeLife).reduce((s,t)=>s+t.amount,0);
