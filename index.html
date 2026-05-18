@@ -248,7 +248,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
         <label class="toggle"><input type="checkbox" id="edit-life" checked><span class="toggle-slider"></span></label>
       </div>
       <div class="toggle-row" id="edit-income-row">
-        <div><div class="toggle-label">生活费来源</div><div class="toggle-sub">此收入计入生活费预算</div></div>
+        <div><div class="toggle-label">计入生活费（摊账抵消）</div><div class="toggle-sub">开启后此收入抵消生活费支出</div></div>
         <label class="toggle"><input type="checkbox" id="edit-income-life"><span class="toggle-slider"></span></label>
       </div>
     </div>
@@ -462,9 +462,10 @@ function render(){
   const tIn=inn.reduce((s,t)=>s+t.amount,0);
   const days=new Date(y,m,0).getDate();
   const activeDays=new Set(out.map(t=>t.date.getDate())).size||1;
-  const lIn=mT.filter(t=>!t.isOut&&t.isIncomeLife).reduce((s,t)=>s+t.amount,0);
+  const lIn=mT.filter(t=>!t.isOut&&t.isLife).reduce((s,t)=>s+t.amount,0);
+  const lifeSourceIn=mT.filter(t=>!t.isOut&&t.isIncomeLife).reduce((s,t)=>s+t.amount,0);
   const lOut=mT.filter(t=>t.isOut&&t.isLife).reduce((s,t)=>s+t.amount,0);
-  const lifeTotal=lIn>0?lIn:(settings.budget||0);
+  const lifeTotal=lifeSourceIn>0?lifeSourceIn:(settings.budget||0);
   const maxTxn=out.reduce((a,b)=>a.amount>b.amount?a:b,{amount:0,name:'—',customName:''});
 
   const grid=document.getElementById('stats-grid');
@@ -472,29 +473,31 @@ function render(){
     grid.innerHTML=`
       <div class="stat-card"><div class="stat-label">本月总支出</div><div class="stat-value out">${fmt(tOut)}</div><div class="stat-sub">${out.length} 笔支出</div></div>
       <div class="stat-card"><div class="stat-label">本月总收入</div><div class="stat-value in">${fmt(tIn)}</div><div class="stat-sub">${inn.length} 笔收入</div></div>
-      <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value ${lifeTotal>0?(lOut<=lifeTotal?'ok':'over'):''}">${fmt(lOut)}</div><div class="stat-sub">${lifeTotal>0?(lOut<=lifeTotal?`还剩 ${fmt(lifeTotal-lOut)}`:`超支 ${fmt(lOut-lifeTotal)}`):'标记来源或设预算'}</div></div>
+      <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value ${lifeTotal>0?(lOut-lIn<=lifeTotal?'ok':'over'):''}">${fmt(lOut-lIn)}</div><div class="stat-sub">${lifeTotal>0?((lOut-lIn)<=lifeTotal?`还剩 ${fmt(lifeTotal-(lOut-lIn))}`:`超支 ${fmt((lOut-lIn)-lifeTotal)}`):'标记来源或设预算'}</div></div>
       <div class="stat-card" id="max-card" style="cursor:pointer"><div class="stat-label">最大单笔 ↗</div><div class="stat-value">${fmt(maxTxn.amount)}</div><div class="stat-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(maxTxn.customName||maxTxn.name||'—').slice(0,10)}</div></div>
       <div class="stat-card"><div class="stat-label">日均支出</div><div class="stat-value">${fmt(tOut/activeDays)}</div><div class="stat-sub">${activeDays} 天有消费</div></div>`;
     document.getElementById('max-card').onclick=()=>openMaxModal(out,'全月大额支出');
   } else {
     const lifeActiveDays=new Set(out.map(t=>t.date.getDate())).size||1;
+    const netLout=lOut-lIn;
     grid.innerHTML=`
       <div class="stat-card"><div class="stat-label">生活费支出</div><div class="stat-value out">${fmt(lOut)}</div><div class="stat-sub">${out.length} 笔</div></div>
-      <div class="stat-card"><div class="stat-label">${lIn>0?'来源收入':'备用预算'}</div><div class="stat-value in">${fmt(lifeTotal)}</div><div class="stat-sub">${lifeTotal>0?(lOut<=lifeTotal?`剩 ${fmt(lifeTotal-lOut)}`:`超 ${fmt(lOut-lifeTotal)}`):'未设定'}</div></div>
-      <div class="stat-card"><div class="stat-label">日均生活费</div><div class="stat-value">${fmt(lOut/lifeActiveDays)}</div><div class="stat-sub">${lifeActiveDays} 天有消费</div></div>
+      <div class="stat-card"><div class="stat-label">${lifeSourceIn>0?'来源收入':'备用预算'}</div><div class="stat-value in">${fmt(lifeTotal)}</div><div class="stat-sub">${lifeTotal>0?(netLout<=lifeTotal?`剩 ${fmt(lifeTotal-netLout)}`:`超 ${fmt(netLout-lifeTotal)}`):'未设定'}</div></div>
+      <div class="stat-card"><div class="stat-label">摊账抵消</div><div class="stat-value in">+${fmt(lIn)}</div><div class="stat-sub">净支出 ${fmt(netLout)}</div></div>
       <div class="stat-card" id="max-card" style="cursor:pointer"><div class="stat-label">最大单笔 ↗</div><div class="stat-value">${fmt(maxTxn.amount)}</div><div class="stat-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(maxTxn.customName||maxTxn.name||'—').slice(0,10)}</div></div>`;
     document.getElementById('max-card').onclick=()=>openMaxModal(out,'生活费大额支出');
   }
 
   if(lifeTotal>0){
     document.getElementById('budget-bar-section').classList.remove('hidden');
-    const pct=Math.min(lOut/lifeTotal*100,100);
+    const netLout=lOut-lIn;
+    const pct=Math.min(netLout/lifeTotal*100,100);
     const fill=document.getElementById('budget-fill');
-    fill.style.width=pct+'%';
-    fill.className='budget-fill'+(lOut>lifeTotal?' over':'');
-    const src=lIn>0?`来源 ${fmt(lIn)}`:`预算 ${fmt(lifeTotal)}`;
-    document.getElementById('bl-left').textContent=`生活费 ${fmt(lOut)} / ${fmt(lifeTotal)}（${src}）`;
-    document.getElementById('bl-right').textContent=lOut<=lifeTotal?`剩 ${fmt(lifeTotal-lOut)}`:`超 ${fmt(lOut-lifeTotal)}`;
+    fill.style.width=Math.max(pct,0)+'%';
+    fill.className='budget-fill'+(netLout>lifeTotal?' over':'');
+    const src=lifeSourceIn>0?`来源 ${fmt(lifeSourceIn)}`:`预算 ${fmt(lifeTotal)}`;
+    document.getElementById('bl-left').textContent=`生活费净支出 ${fmt(netLout)} / ${fmt(lifeTotal)}（${src}）`;
+    document.getElementById('bl-right').textContent=netLout<=lifeTotal?`剩 ${fmt(lifeTotal-netLout)}`:`超 ${fmt(netLout-lifeTotal)}`;
   } else {
     document.getElementById('budget-bar-section').classList.add('hidden');
   }
@@ -738,6 +741,14 @@ document.getElementById('filter-row').addEventListener('click',e=>{
 document.getElementById('save-budget').onclick=()=>{
   const v=parseFloat(document.getElementById('budget-input').value);
   if(!isNaN(v)&&v>=0){settings.budget=v;saveS();render();closeM('budget-modal');}
+};
+document.getElementById('do-recat').onclick=()=>{
+  let n=0;
+  allTxns.forEach(t=>{
+    if(!t.customName){t.cat=guessCat(t.name+(t.remark||''));n++;}
+  });
+  save();render();closeM('menu-modal');
+  alert(`已对 ${n} 条未手动命名的交易重新分类`);
 };
 document.getElementById('do-budget').onclick=()=>{document.getElementById('budget-input').value=settings.budget||'';closeM('menu-modal');openM('budget-modal');};
 document.getElementById('menu-btn').onclick=()=>openM('menu-modal');
