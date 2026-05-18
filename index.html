@@ -248,8 +248,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
         <label class="toggle"><input type="checkbox" id="edit-life" checked><span class="toggle-slider"></span></label>
       </div>
       <div class="toggle-row" id="edit-income-row">
-        <div><div class="toggle-label">计入生活费（摊账抵消）</div><div class="toggle-sub">开启后此收入抵消生活费支出</div></div>
+        <div><div class="toggle-label">计入生活费</div><div class="toggle-sub">此收入参与生活费加减（如摊账）</div></div>
         <label class="toggle"><input type="checkbox" id="edit-income-life"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row" id="edit-income-source-row">
+        <div><div class="toggle-label">生活费来源</div><div class="toggle-sub">此收入作为本月生活费总额</div></div>
+        <label class="toggle"><input type="checkbox" id="edit-income-source"><span class="toggle-slider"></span></label>
       </div>
     </div>
     <button class="save-btn" id="save-edit">保存</button>
@@ -329,7 +333,7 @@ let catSortBy='amount',catSortDir='desc';
 let catDetailTxns=[];
 
 function load(){
-  try{allTxns=JSON.parse(localStorage.getItem('txns')||'[]').map(t=>({...t,date:new Date(t.date),isLife:t.isLife!==false}));}catch(e){allTxns=[];}
+  try{allTxns=JSON.parse(localStorage.getItem('txns')||'[]').map(t=>({...t,date:new Date(t.date),isLife:t.isLife!==false,isIncomeSource:t.isIncomeSource||t.isIncomeLife||false,isIncomeLife:t.isIncomeLife&&!t.isIncomeSource?false:(t.isIncomeLife||false)}));}catch(e){allTxns=[];}
   try{settings=Object.assign({budget:0},JSON.parse(localStorage.getItem('settings')||'{}'));}catch(e){settings={budget:0};}
 }
 const save=()=>localStorage.setItem('txns',JSON.stringify(allTxns));
@@ -416,7 +420,7 @@ function merge(newT){const ex=new Set(allTxns.map(t=>t.key));let n=0;for(const t
 function buildMonths(){const s=new Set(allTxns.map(t=>mk(t.date)));months=[...s].sort().reverse();}
 function getMonthTxns(){return allTxns.filter(t=>mk(t.date)===months[mi]);}
 function getViewTxns(mT){
-  if(currentTab==='life')return mT.filter(t=>t.isOut?t.isLife:t.isIncomeLife);
+  if(currentTab==='life')return mT.filter(t=>t.isOut?t.isLife:(t.isIncomeLife||t.isIncomeSource));
   return mT;
 }
 
@@ -426,7 +430,7 @@ function txnHTML(t,showDate,showChk){
   const ds=showDate
     ?`${t.date.getMonth()+1}/${t.date.getDate()} ${String(t.date.getHours()).padStart(2,'0')}:${String(t.date.getMinutes()).padStart(2,'0')}`
     :`${String(t.date.getHours()).padStart(2,'0')}:${String(t.date.getMinutes()).padStart(2,'0')}`;
-  const tag=t.isOut?(t.isLife?'<span class="tag tag-life">生活费</span>':'<span class="tag tag-nonlife">非生活费</span>'):(t.isIncomeLife?'<span class="tag tag-life">生活费来源</span>':'');
+  const tag=t.isOut?(t.isLife?'<span class="tag tag-life">生活费</span>':'<span class="tag tag-nonlife">非生活费</span>'):(t.isIncomeSource?'<span class="tag tag-life">生活费来源</span>':(t.isIncomeLife?'<span class="tag tag-life">计入生活费</span>':''));
   const chk=showChk?`<div class="txn-chk${selected.has(t.key)?' checked':''}">${selected.has(t.key)?'✓':''}</div>`:'';
   return `${chk}<div class="txn-ico" style="background:${c.color}22"><i class="ti ${c.icon}" style="color:${c.color}"></i></div><div class="txn-info"><div class="txn-name">${dn.length>18?dn.slice(0,18)+'…':dn}</div><div class="txn-meta">${ds} · ${c.key} ${tag}</div></div><div class="txn-amt ${t.isOut?'out':'in'}">${t.isOut?'-':'+'}${fmtF(t.amount)}</div>`;
 }
@@ -462,8 +466,8 @@ function render(){
   const tIn=inn.reduce((s,t)=>s+t.amount,0);
   const days=new Date(y,m,0).getDate();
   const activeDays=new Set(out.map(t=>t.date.getDate())).size||1;
-  const lIn=mT.filter(t=>!t.isOut&&t.isLife).reduce((s,t)=>s+t.amount,0);
-  const lifeSourceIn=mT.filter(t=>!t.isOut&&t.isIncomeLife).reduce((s,t)=>s+t.amount,0);
+  const lIn=mT.filter(t=>!t.isOut&&t.isIncomeLife).reduce((s,t)=>s+t.amount,0);
+  const lifeSourceIn=mT.filter(t=>!t.isOut&&t.isIncomeSource).reduce((s,t)=>s+t.amount,0);
   const lOut=mT.filter(t=>t.isOut&&t.isLife).reduce((s,t)=>s+t.amount,0);
   const lifeTotal=lifeSourceIn>0?lifeSourceIn:(settings.budget||0);
   const maxTxn=out.reduce((a,b)=>a.amount>b.amount?a:b,{amount:0,name:'—',customName:''});
@@ -612,7 +616,9 @@ function openEditModal(key){
   document.getElementById('edit-name').value=t.customName||t.name;
   document.getElementById('edit-life').checked=t.isLife!==false;
   document.getElementById('edit-income-life').checked=t.isIncomeLife===true;
+  document.getElementById('edit-income-source').checked=t.isIncomeSource===true;
   document.getElementById('edit-income-row').style.display=t.isOut?'none':'';
+  document.getElementById('edit-income-source-row').style.display=t.isOut?'none':'';
   const grid=document.getElementById('edit-cat-grid');
   grid.innerHTML=CATS.map(c=>`<button class="cat-option${t.cat===c.key?' selected':''}" data-cat="${c.key}"><i class="ti ${c.icon}" style="color:${c.color}"></i>${c.key}</button>`).join('');
   grid.querySelectorAll('.cat-option').forEach(b=>{b.onclick=()=>{grid.querySelectorAll('.cat-option').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};});
@@ -673,6 +679,7 @@ document.getElementById('save-edit').onclick=()=>{
   t.cat=sel?sel.dataset.cat:t.cat;
   t.isLife=document.getElementById('edit-life').checked;
   t.isIncomeLife=document.getElementById('edit-income-life').checked;
+  t.isIncomeSource=document.getElementById('edit-income-source').checked;
   save();render();closeM('edit-modal');
 };
 
